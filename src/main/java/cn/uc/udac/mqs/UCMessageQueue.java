@@ -10,9 +10,13 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import org.apache.log4j.Logger;
+
+import cn.uc.udac.zjj.bolts.BoltCrawler;
 
 public class UCMessageQueue implements MessageQueue {
 
+	static public Logger LOG = Logger.getLogger(BoltCrawler.class);
 	private String _host;
 	private int _port;
 	private String _qname;
@@ -42,6 +46,7 @@ public class UCMessageQueue implements MessageQueue {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(),"utf-8"));
 		while ((line = reader.readLine()) != null)
 			resp += line;
+		LOG.info(String.format("resp = %s", resp));
 		reader.close();
         conn.disconnect();
         if (check(resp)) return resp;
