@@ -3,4 +3,4 @@ SpoutLog.ucmq.host: "10.34.102.125"
 SpoutLog.ucmq.port: 8803
 SpoutLog.ucmq.qname: "zjj"
 
-BoltDateUrlPv.pv.trigger: 10
+BoltUrlDatePv.pv.trigger: 10

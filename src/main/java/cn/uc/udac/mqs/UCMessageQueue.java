@@ -36,7 +36,7 @@ public class UCMessageQueue implements MessageQueue {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(),"utf-8"));
 		while ((line = reader.readLine()) != null)
 			resp += line;
-		LOG.info(String.format("resp = %s", resp));
+		//LOG.info(String.format("resp = %s", resp));
 		reader.close();
         conn.disconnect();
         if (resp.indexOf(tag) == 0)

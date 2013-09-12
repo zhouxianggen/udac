@@ -40,8 +40,8 @@ public class BoltCrawler extends BaseBasicBolt {
 	public void execute(Tuple input, BasicOutputCollector collector) {
 		if (input.size() != 2)
 			return;
-		_count += 1;
-		LOG.info(String.format("BoltCrawler.count = %d", _count));
+		if (_count++ % 1000 == 0)
+			LOG.info(String.format("BoltCrawler.count = %d", _count));
 		String date = input.getString(0);
 		String url = input.getString(1);
 		try {

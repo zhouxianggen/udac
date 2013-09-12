@@ -40,16 +40,15 @@ public class BoltWordSegment extends BaseBasicBolt {
         try {
         	_t_site_date_word = new HTable(hbconf, "t_site_date_word");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.info("BoltWordSegment.exception =", e);
 		}
     }
     
 	public void execute(Tuple input, BasicOutputCollector collector) {
 		if (input.size() != 3)
 			return;
-		_count += 1;
-		LOG.info(String.format("BoltWordSegment.count = %d", _count));
+		if (_count++ % 1000 == 0)
+			LOG.info(String.format("BoltWordSegment.count = %d", _count));
 		String site = input.getString(0);
 		String date = input.getString(1);
 		String txt = input.getString(2);

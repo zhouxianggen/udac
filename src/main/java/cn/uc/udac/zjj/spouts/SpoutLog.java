@@ -37,10 +37,11 @@ public class SpoutLog extends BaseRichSpout {
 	public void nextTuple() {
 		try {
 			String[] parts = _ucmq.get().split("`");
-			_count += 1;
-			LOG.info(String.format("mq.get=%s, count=%d", Arrays.toString(parts), _count));
-			if (parts.length == 5)
-				_collector.emit(new Values(parts));
+			if (parts.length != 5)
+				return;
+			if (_count++ % 1000 == 0)
+				LOG.info(String.format("mq.get=%s, count=%d", Arrays.toString(parts), _count));
+			_collector.emit(new Values(parts));
 		}
 		catch (IOException e) {
 			LOG.info("SpoutLog.exception = ", e);

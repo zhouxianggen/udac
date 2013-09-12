@@ -34,16 +34,15 @@ public class BoltSnDateSitePv extends BaseBasicBolt {
         try {
 			_t_sn_date_site_pv = new HTable(hbconf, "t_sn_date_site_pv");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.info("BoltSnDateSitePv.exception = ", e);
 		}
     }
     
 	public void execute(Tuple input, BasicOutputCollector collector) {
 		if (input.size() != 5)
 			return;
-		_count += 1;
-		LOG.info(String.format("BoltSnDateSitePv.count = %d", _count));
+		if (_count++ % 1000 == 0)
+			LOG.info(String.format("BoltSnDateSitePv.count = %d", _count));
 		String time = input.getString(0);
 		String sn = input.getString(1);
 		String url = input.getString(4);

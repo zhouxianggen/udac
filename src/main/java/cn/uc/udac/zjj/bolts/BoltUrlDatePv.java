@@ -32,31 +32,30 @@ public class BoltUrlDatePv extends BaseBasicBolt {
 
     public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
         _collector = collector;
-        _pv_trigger = (Integer)conf.get("BoltDateUrlPv.pv.trigger");
+        _pv_trigger = (Integer)conf.get("BoltUrlDatePv.pv.trigger");
         Configuration hbconf = HBaseConfiguration.create();
         try {
         	_t_date_url_pv = new HTable(hbconf, "t_date_url_pv");
 		} catch (IOException e) {
-			LOG.info("BoltDateUrlPv.exception = ", e);
+			LOG.info("BoltUrlDatePv.exception = ", e);
 		}
     }
     
 	public void execute(Tuple input, BasicOutputCollector collector) {
 		if (input.size() != 5)
 			return;
-		_count += 1;
-		LOG.info(String.format("BoltDateUrlPv.count = %d", _count));
+		if (_count++ % 1000 == 0)
+			LOG.info(String.format("BoltUrlDatePv.count = %d", _count));
 		String time = input.getString(0);
 		String url = input.getString(4);
 		try {
-			String date = new SimpleDateFormat("yyyy-MM-dd").format(new SimpleDateFormat("yyyy-MM-dd").parse(time));
+			String date = new SimpleDateFormat("yyyy-MM-dd").format(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time));
 			long pv = _t_date_url_pv.incrementColumnValue(url.getBytes(), "pv".getBytes(), date.getBytes(), 1);
 			if (pv % _pv_trigger == 0)
 				_collector.emit(input, new Values(date, url));
 		}
 		catch (Exception e) {
-			e.printStackTrace();
-			return;
+			LOG.info("BoltUrlDatePv.exception = ", e);
 		}
 	}
 
