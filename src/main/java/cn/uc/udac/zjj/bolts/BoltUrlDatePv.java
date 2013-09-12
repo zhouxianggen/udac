@@ -27,7 +27,7 @@ public class BoltUrlDatePv extends BaseBasicBolt {
 	static public Logger LOG = Logger.getLogger(BoltUrlDatePv.class);
 	private int _count = 0;
 	private OutputCollector _collector;
-	private HTable _t_date_url_pv;
+	private HTable _t_url_date_pv;
 	private long _pv_trigger;
 
     public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
@@ -35,7 +35,7 @@ public class BoltUrlDatePv extends BaseBasicBolt {
         _pv_trigger = (Integer)conf.get("BoltUrlDatePv.pv.trigger");
         Configuration hbconf = HBaseConfiguration.create();
         try {
-        	_t_date_url_pv = new HTable(hbconf, "t_date_url_pv");
+        	_t_url_date_pv = new HTable(hbconf, "t_date_url_pv");
 		} catch (IOException e) {
 			LOG.info("BoltUrlDatePv.exception = ", e);
 		}
@@ -51,7 +51,7 @@ public class BoltUrlDatePv extends BaseBasicBolt {
 		try {
 			String date = new SimpleDateFormat("yyyy-MM-dd").format(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time));
 			if (date != null) {
-				long pv = _t_date_url_pv.incrementColumnValue(url.getBytes(), "pv".getBytes(), date.getBytes(), 1);
+				long pv = _t_url_date_pv.incrementColumnValue(url.getBytes(), "pv".getBytes(), date.getBytes(), 1);
 				if (pv % _pv_trigger == 0)
 					_collector.emit(input, new Values(date, url));
 			}

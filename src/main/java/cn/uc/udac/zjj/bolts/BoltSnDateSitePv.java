@@ -43,16 +43,15 @@ public class BoltSnDateSitePv extends BaseBasicBolt {
 			return;
 		if (_count++ % 1000 == 0)
 			LOG.info(String.format("BoltSnDateSitePv.count = %d", _count));
-		String time = input.getString(0);
-		String sn = input.getString(1);
-		String url = input.getString(4);
-		String date = null;
-		String site = null;
+		String time = input.getString(0).trim();
+		String sn = input.getString(1).trim();
+		String url = input.getString(4).trim();
 		try {
-			date = new SimpleDateFormat("yyyy-MM-dd").format(new SimpleDateFormat("yyyy-MM-dd").parse(time));
-			site = new URL(url).getHost();
+			String date = new SimpleDateFormat("yyyy-MM-dd").format(new SimpleDateFormat("yyyy-MM-dd").parse(time));
+			String site = new URL(url).getHost();
 			String key = sn + "/" + date;
-			_t_sn_date_site_pv.incrementColumnValue(key.getBytes(), "site".getBytes(), site.getBytes(), 1);
+			if (date != null && site != null)
+				_t_sn_date_site_pv.incrementColumnValue(key.getBytes(), "site".getBytes(), site.getBytes(), 1);
 		}
 		catch (Exception e) {
 			LOG.info("BoltSnDateSitePv.exception = ", e);
