@@ -50,9 +50,11 @@ public class BoltUrlDatePv extends BaseBasicBolt {
 		String url = input.getString(4);
 		try {
 			String date = new SimpleDateFormat("yyyy-MM-dd").format(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time));
-			long pv = _t_date_url_pv.incrementColumnValue(url.getBytes(), "pv".getBytes(), date.getBytes(), 1);
-			if (pv % _pv_trigger == 0)
-				_collector.emit(input, new Values(date, url));
+			if (date != null) {
+				long pv = _t_date_url_pv.incrementColumnValue(url.getBytes(), "pv".getBytes(), date.getBytes(), 1);
+				if (pv % _pv_trigger == 0)
+					_collector.emit(input, new Values(date, url));
+			}
 		}
 		catch (Exception e) {
 			LOG.info("BoltUrlDatePv.exception = ", e);

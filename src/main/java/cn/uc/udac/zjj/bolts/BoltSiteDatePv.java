@@ -21,7 +21,6 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseBasicBolt;
 import backtype.storm.tuple.Tuple;
 
-
 public class BoltSiteDatePv extends BaseBasicBolt {
 
 	static public Logger LOG = Logger.getLogger(BoltSiteDatePv.class);
@@ -29,17 +28,17 @@ public class BoltSiteDatePv extends BaseBasicBolt {
 	private OutputCollector _collector;
 	private HTable _t_site_date_pv;
 
-    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
-        _collector = collector;
-        Configuration hbconf = HBaseConfiguration.create();
-        try {
-        	_t_site_date_pv = new HTable(hbconf, "t_site_date_pv");
+	public void prepare(Map conf, TopologyContext context,
+			OutputCollector collector) {
+		_collector = collector;
+		Configuration hbconf = HBaseConfiguration.create();
+		try {
+			_t_site_date_pv = new HTable(hbconf, "t_site_date_pv");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.info("BoltSiteDatePv.prepare.exception = ", e);
 		}
-    }
-    
+	}
+
 	public void execute(Tuple input, BasicOutputCollector collector) {
 		if (input.size() != 5)
 			return;
@@ -48,12 +47,16 @@ public class BoltSiteDatePv extends BaseBasicBolt {
 		String time = input.getString(0);
 		String url = input.getString(4);
 		try {
-			String date = new SimpleDateFormat("yyyy-MM-dd").format(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time));
+			String date = new SimpleDateFormat("yyyy-MM-dd")
+					.format(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+							.parse(time));
 			String site = new URL(url).getHost();
-			_t_site_date_pv.incrementColumnValue(site.getBytes(), "pv".getBytes(), date.getBytes(), 1);
-		}
-		catch (Exception e) {
-			LOG.info("BoltSiteDatePv.exception = ", e);
+			if (site != null && date != null) {
+				_t_site_date_pv.incrementColumnValue(site.getBytes(),
+						"pv".getBytes(), date.getBytes(), 1);
+			}
+		} catch (Exception e) {
+			LOG.info("BoltSiteDatePv.execute.exception = ", e);
 		}
 	}
 

@@ -52,9 +52,7 @@ public class BoltSnDateSitePv extends BaseBasicBolt {
 			date = new SimpleDateFormat("yyyy-MM-dd").format(new SimpleDateFormat("yyyy-MM-dd").parse(time));
 			site = new URL(url).getHost();
 			String key = sn + "/" + date;
-			Increment increment = new Increment(key.getBytes());
-			increment.addColumn("site".getBytes(), site.getBytes(), 1);
-			_t_sn_date_site_pv.increment(increment);
+			_t_sn_date_site_pv.incrementColumnValue(key.getBytes(), "site".getBytes(), site.getBytes(), 1);
 		}
 		catch (Exception e) {
 			LOG.info("BoltSnDateSitePv.exception = ", e);
