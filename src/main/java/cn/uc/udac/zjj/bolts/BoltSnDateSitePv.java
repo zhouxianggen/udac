@@ -27,12 +27,17 @@ public class BoltSnDateSitePv extends BaseBasicBolt {
 
 	static public Logger LOG = Logger.getLogger(BoltSnDateSitePv.class);
 	private int _count = 0;
-	Configuration _hbconf;
-	private OutputCollector _collector;
+	HTable _t_sn_date_site_pv;
 
-    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
-        _collector = collector;
-        _hbconf = HBaseConfiguration.create();
+	@Override
+	public void prepare(Map stormConf, TopologyContext context) {
+    	Configuration hbconf = HBaseConfiguration.create();
+    	try {
+    		_t_sn_date_site_pv = new HTable(hbconf, "t_zjj_sn_date_site_pv");
+    	}
+    	catch (Exception e) {
+    		LOG.info("BoltSnDateSitePv.prepare.exception:", e);
+    	}
     }
     
     private String getDate(String s) throws ParseException {
@@ -40,6 +45,7 @@ public class BoltSnDateSitePv extends BaseBasicBolt {
     	return new SimpleDateFormat("yyyy-MM-dd").format(d);
     }
     
+    @Override
 	public void execute(Tuple input, BasicOutputCollector collector) {
 		if (input.size() != 5)
 			return;
@@ -52,14 +58,14 @@ public class BoltSnDateSitePv extends BaseBasicBolt {
 			String date = getDate(time);
 			String site = new URL(url).getHost();
 			String key = sn + "/" + date;
-			HTable t = new HTable(_hbconf, "t_zjj_sn_date_site_pv");
-			t.incrementColumnValue(key.getBytes(), "site".getBytes(), site.getBytes(), 1);
+			_t_sn_date_site_pv.incrementColumnValue(key.getBytes(), "site".getBytes(), site.getBytes(), 1);
 		}
 		catch (Exception e) {
-			LOG.info("BoltSnDateSitePv.exception = ", e);
+			LOG.info("BoltSnDateSitePv.execute.exception:", e);
 		}
 	}
 
+    @Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 	}
 

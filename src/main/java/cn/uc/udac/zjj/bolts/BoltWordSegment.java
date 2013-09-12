@@ -19,6 +19,7 @@ import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.BasicOutputCollector;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseBasicBolt;
+import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Tuple;
 
 import org.ansj.domain.Term;
@@ -27,19 +28,27 @@ import org.ansj.splitWord.analysis.ToAnalysis;
 
 import com.esotericsoftware.minlog.Log;
 
-public class BoltWordSegment extends BaseBasicBolt {
+public class BoltWordSegment extends BaseRichBolt {
 
 	static public Logger LOG = Logger.getLogger(BoltWordSegment.class);
 	private int _count = 0;
 	private OutputCollector _collector;
-	Configuration _hbconf;
+	HTable _t_site_date_word_pv;
 
-    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
-        _collector = collector;
-        _hbconf = HBaseConfiguration.create();
-    }
+	@Override
+	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
+		_collector = collector;
+		Configuration hbconf = HBaseConfiguration.create();
+		try {
+			_t_site_date_word_pv = new HTable(hbconf, "t_zjj_site_date_word_pv");
+    	}
+    	catch (Exception e) {
+    		LOG.info("BoltWordSegment.prepare.exception:", e);
+    	}
+	}
     
-	public void execute(Tuple input, BasicOutputCollector collector) {
+	@Override
+	public void execute(Tuple input) {
 		if (input.size() != 3)
 			return;
 		if (_count++ % 1000 == 0)
@@ -51,15 +60,15 @@ public class BoltWordSegment extends BaseBasicBolt {
 		List parser = ToAnalysis.parse(txt);
 		Iterator<String> it = parser.iterator();
 		try {
-			HTable t = new HTable(_hbconf, "t_zjj_site_date_word_pv");
 			while (it.hasNext())
-				t.incrementColumnValue(key.getBytes(), "word".getBytes(), it.next().getBytes(), 1);
+				_t_site_date_word_pv.incrementColumnValue(key.getBytes(), "word".getBytes(), it.next().getBytes(), 1);
 		}
 		catch (IOException e) {
-			LOG.info("BoltWordSegment.exception =", e);
+			LOG.info("BoltWordSegment.execute.exception:", e);
 		}
 	}
 
+	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 	}
 

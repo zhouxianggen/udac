@@ -19,31 +19,40 @@ import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.BasicOutputCollector;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseBasicBolt;
+import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 
 
-public class BoltUrlDatePv extends BaseBasicBolt {
+public class BoltUrlDatePv extends BaseRichBolt {
 
 	static public Logger LOG = Logger.getLogger(BoltUrlDatePv.class);
 	private int _count = 0;
 	private OutputCollector _collector;
-	Configuration _hbconf;
 	private long _pv_trigger;
+	HTable _t_url_date_pv;
 
-    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
-        _collector = collector;
-        _pv_trigger = (Integer)conf.get("BoltUrlDatePv.pv.trigger");
-        _hbconf = HBaseConfiguration.create();
-    }
+	@Override
+	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
+		_collector = collector;
+		_pv_trigger = (Integer)conf.get("BoltUrlDatePv.pv.trigger");
+		Configuration hbconf = HBaseConfiguration.create();
+		try {
+			_t_url_date_pv = new HTable(hbconf, "t_zjj_url_date_pv");
+    	}
+    	catch (Exception e) {
+    		LOG.info("BoltUrlDatePv.prepare.exception:", e);
+    	}
+	}
     
     private String getDate(String s) throws ParseException {
     	Date d = new SimpleDateFormat("yyyy-MM-dd").parse(s);
     	return new SimpleDateFormat("yyyy-MM-dd").format(d);
     }
     
-	public void execute(Tuple input, BasicOutputCollector collector) {
+    @Override
+	public void execute(Tuple input) {
 		if (input.size() != 5)
 			return;
 		if (_count++ % 1000 == 0)
@@ -52,16 +61,16 @@ public class BoltUrlDatePv extends BaseBasicBolt {
 		String url = input.getString(4);
 		try {
 			String date = getDate(time);
-			HTable t = new HTable(_hbconf, "t_zjj_url_date_pv");
-			long pv = t.incrementColumnValue(url.getBytes(), "date".getBytes(), date.getBytes(), 1);
+			long pv = _t_url_date_pv.incrementColumnValue(url.getBytes(), "date".getBytes(), date.getBytes(), 1);
 			if (pv % _pv_trigger == 0)
 				_collector.emit(input, new Values(date, url));
 		}
 		catch (Exception e) {
-			LOG.info("BoltUrlDatePv.exception = ", e);
+			LOG.info("BoltUrlDatePv.execute.exception:", e);
 		}
 	}
 
+    @Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 		declarer.declare(new Fields("date", "url"));
 	}
