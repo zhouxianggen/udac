@@ -36,7 +36,7 @@ public class UCMessageQueue implements MessageQueue {
 	@Override
 	public String get() throws IOException {
 		String resp=null, line=null;
-		URL url = new URL(String.format("%s:%d/?name=%s&opt=get&ver=2", _host, _port, _qname));
+		URL url = new URL(String.format("http://%s:%d/?name=%s&opt=get&ver=2", _host, _port, _qname));
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.connect();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(),"utf-8"));

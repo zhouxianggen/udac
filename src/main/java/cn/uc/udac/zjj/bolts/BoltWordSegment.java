@@ -53,7 +53,7 @@ public class BoltWordSegment extends BaseBasicBolt {
 		String site = input.getString(0);
 		String date = input.getString(1);
 		String txt = input.getString(2);
-		String key = site + "`" + date;
+		String key = site + "/" + date;
 		List parser = ToAnalysis.parse(txt);
 		Iterator<String> it = parser.iterator();
 		while (it.hasNext())

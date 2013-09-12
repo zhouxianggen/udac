@@ -28,8 +28,8 @@ public class StormMain {
 
 		builder.setSpout("s_log", new SpoutLog(), 16);
 		builder.setBolt("b_sn_date_site_pv", new BoltSnDateSitePv(), 1).shuffleGrouping("s_log");
-		builder.setBolt("b_date_site_pv", new BoltDateSitePv(), 1).shuffleGrouping("s_log");
-		builder.setBolt("b_date_url_pv", new BoltDateUrlPv(), 16).shuffleGrouping("s_log");
+		builder.setBolt("b_site_date_pv", new BoltSiteDatePv(), 1).shuffleGrouping("s_log");
+		builder.setBolt("b_url_date_pv", new BoltUrlDatePv(), 16).shuffleGrouping("s_log");
 		builder.setBolt("b_crawler", new BoltCrawler(), 16).shuffleGrouping("b_date_url_pv");
 		builder.setBolt("b_word_segment", new BoltWordSegment(), 16).shuffleGrouping("b_crawler");
 		
@@ -39,7 +39,7 @@ public class StormMain {
 		conf.putAll(myconf);
 
 		try {
-			StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
+			StormSubmitter.submitTopology("zjj", conf, builder.createTopology());
 		} catch (AlreadyAliveException e) {
 			e.printStackTrace();
 		} catch (InvalidTopologyException e) {
