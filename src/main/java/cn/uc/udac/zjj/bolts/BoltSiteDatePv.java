@@ -26,17 +26,19 @@ public class BoltSiteDatePv extends BaseBasicBolt {
 	static public Logger LOG = Logger.getLogger(BoltSiteDatePv.class);
 	private int _count = 0;
 	private OutputCollector _collector;
-	private HTable _t_site_date_pv;
+	Configuration _hbconf;
+	//private HTable _t_site_date_pv;
 
 	public void prepare(Map conf, TopologyContext context,
 			OutputCollector collector) {
 		_collector = collector;
+		_hbconf = HBaseConfiguration.create();
 		Configuration hbconf = HBaseConfiguration.create();
-		try {
-			_t_site_date_pv = new HTable(hbconf, "t_site_date_pv");
-		} catch (IOException e) {
-			LOG.info("BoltSiteDatePv.prepare.exception = ", e);
-		}
+		//try {
+		//	_t_site_date_pv = new HTable(hbconf, "t_site_date_pv");
+		//} catch (IOException e) {
+		//	LOG.info("BoltSiteDatePv.prepare.exception = ", e);
+		//}
 	}
 
 	public void execute(Tuple input, BasicOutputCollector collector) {
@@ -50,7 +52,9 @@ public class BoltSiteDatePv extends BaseBasicBolt {
 			String date = new SimpleDateFormat("yyyy-MM-dd").format(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time));
 			String site = new URL(url).getHost();
 			if (site != null && date != null) {
-				_t_site_date_pv.incrementColumnValue(site.getBytes(), "pv".getBytes(), date.getBytes(), 1);
+				HTable t_site_date_pv = new HTable(_hbconf, "t_site_date_pv");
+				t_site_date_pv.incrementColumnValue(site.getBytes(), "pv".getBytes(), date.getBytes(), 1);
+				//_t_site_date_pv.incrementColumnValue(site.getBytes(), "pv".getBytes(), date.getBytes(), 1);
 			}
 		} catch (Exception e) {
 			LOG.info("BoltSiteDatePv.execute.exception = ", e);
