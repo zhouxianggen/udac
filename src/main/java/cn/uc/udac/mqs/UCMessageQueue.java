@@ -29,10 +29,10 @@ public class UCMessageQueue implements MessageQueue {
 	
 	private boolean check(String resp) {
 		boolean flag = false;
-		String tag = "UCMQ_HTTP_OK\r\n";
+		String tag = "UCMQ_HTTP_OK";
 		if (resp.indexOf(tag) == 0) {
 			flag = true;
-			resp = resp.substring(tag.length());
+			resp = resp.substring(tag.length()).trim();
 		}
 		return flag;
 	}
