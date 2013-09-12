@@ -30,7 +30,7 @@ public class BoltUrlDatePv extends BaseRichBolt {
 	@Override
 	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
 		_collector = collector;
-		_pv_trigger = (Integer)conf.get("BoltUrlDatePv.pv.trigger");
+		_pv_trigger = (Long)conf.get("BoltUrlDatePv.pv.trigger");
 		Configuration hbconf = HBaseConfiguration.create();
 		try {
 			_t_url_date_pv = new HTable(hbconf, "t_zjj_url_date_pv");

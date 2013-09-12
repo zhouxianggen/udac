@@ -16,6 +16,7 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Tuple;
 import org.ansj.splitWord.analysis.ToAnalysis;
+import org.ansj.domain.Term;
 
 public class BoltWordSegment extends BaseRichBolt {
 
@@ -46,11 +47,11 @@ public class BoltWordSegment extends BaseRichBolt {
 		String date = input.getString(1);
 		String txt = input.getString(2);
 		String key = site + "/" + date;
-		List parser = ToAnalysis.parse(txt);
-		Iterator<String> it = parser.iterator();
+		List<Term> parser = ToAnalysis.parse(txt);
+		Iterator<Term> it = parser.iterator();
 		try {
 			while (it.hasNext())
-				_t_site_date_word_pv.incrementColumnValue(key.getBytes(), "word".getBytes(), it.next().getBytes(), 1);
+				_t_site_date_word_pv.incrementColumnValue(key.getBytes(), "word".getBytes(), it.next().getName().getBytes(), 1);
 		}
 		catch (IOException e) {
 			LOG.info("BoltWordSegment.execute.exception:", e);
