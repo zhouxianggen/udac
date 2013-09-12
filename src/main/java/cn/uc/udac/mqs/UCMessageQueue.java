@@ -27,19 +27,9 @@ public class UCMessageQueue implements MessageQueue {
 		_qname = qname;
 	}
 	
-	private boolean check(String resp) {
-		boolean flag = false;
-		String tag = "UCMQ_HTTP_OK";
-		if (resp.indexOf(tag) == 0) {
-			flag = true;
-			resp = resp.substring(tag.length()).trim();
-		}
-		return flag;
-	}
-	
 	@Override
 	public String get() throws IOException {
-		String resp="", line="";
+		String resp="", line="", tag = "UCMQ_HTTP_OK";
 		URL url = new URL(String.format("http://%s:%d/?name=%s&opt=get&ver=2", _host, _port, _qname));
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.connect();
@@ -49,13 +39,14 @@ public class UCMessageQueue implements MessageQueue {
 		LOG.info(String.format("resp = %s", resp));
 		reader.close();
         conn.disconnect();
-        if (check(resp)) return resp;
+        if (resp.indexOf(tag) == 0)
+			return resp.substring(tag.length()).trim();
         else return "";
 	}
 
 	@Override
 	public boolean put(String msg) throws IOException {
-		String resp=null, line=null;
+		String resp="", line="", tag = "UCMQ_HTTP_OK";
 		URL url = new URL(String.format("%s:%d/?name=%s&opt=put&ver=2", _host, _port, _qname));
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setDoOutput(true);
@@ -72,7 +63,7 @@ public class UCMessageQueue implements MessageQueue {
 			resp += line;
 		reader.close();
         conn.disconnect();
-        return check(resp);
+        return resp.indexOf(tag) == 0;
 	}
 
 	@Override
