@@ -1,6 +1,5 @@
 package cn.uc.udac.zjj.bolts;
 
-import java.io.IOException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -10,12 +9,8 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HTable;
-import org.apache.hadoop.hbase.client.Increment;
 import org.apache.log4j.Logger;
 
-import cn.uc.udac.zjj.spouts.SpoutLog;
-
-import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.BasicOutputCollector;
 import backtype.storm.topology.OutputFieldsDeclarer;
@@ -27,7 +22,7 @@ public class BoltSnDateSitePv extends BaseBasicBolt {
 
 	static public Logger LOG = Logger.getLogger(BoltSnDateSitePv.class);
 	private int _count = 0;
-	HTable _t_sn_date_site_pv;
+	private HTable _t_sn_date_site_pv;
 
 	@Override
 	public void prepare(Map stormConf, TopologyContext context) {

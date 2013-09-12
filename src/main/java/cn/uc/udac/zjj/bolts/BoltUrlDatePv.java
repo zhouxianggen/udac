@@ -1,7 +1,5 @@
 package cn.uc.udac.zjj.bolts;
 
-import java.io.IOException;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -9,16 +7,12 @@ import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
-import org.apache.hadoop.hbase.client.Increment;
 import org.apache.log4j.Logger;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.BasicOutputCollector;
 import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.topology.base.BaseBasicBolt;
 import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
@@ -31,7 +25,7 @@ public class BoltUrlDatePv extends BaseRichBolt {
 	private int _count = 0;
 	private OutputCollector _collector;
 	private long _pv_trigger;
-	HTable _t_url_date_pv;
+	private HTable _t_url_date_pv;
 
 	@Override
 	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {

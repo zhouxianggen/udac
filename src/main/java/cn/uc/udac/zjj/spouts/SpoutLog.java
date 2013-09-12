@@ -6,7 +6,6 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
-import backtype.storm.utils.Utils;
 
 import cn.uc.udac.mqs.UCMessageQueue;
 
@@ -15,7 +14,6 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.regex.*;
 
 public class SpoutLog extends BaseRichSpout {
 	 
