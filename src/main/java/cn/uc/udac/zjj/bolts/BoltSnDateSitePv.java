@@ -2,7 +2,9 @@ package cn.uc.udac.zjj.bolts;
 
 import java.io.IOException;
 import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
@@ -25,17 +27,17 @@ public class BoltSnDateSitePv extends BaseBasicBolt {
 
 	static public Logger LOG = Logger.getLogger(BoltSnDateSitePv.class);
 	private int _count = 0;
+	Configuration _hbconf;
 	private OutputCollector _collector;
-	private HTable _t_sn_date_site_pv;
 
     public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
         _collector = collector;
-        Configuration hbconf = HBaseConfiguration.create();
-        try {
-			_t_sn_date_site_pv = new HTable(hbconf, "t_sn_date_site_pv");
-		} catch (IOException e) {
-			LOG.info("BoltSnDateSitePv.exception = ", e);
-		}
+        _hbconf = HBaseConfiguration.create();
+    }
+    
+    private String getDate(String s) throws ParseException {
+    	Date d = new SimpleDateFormat("yyyy-MM-dd").parse(s);
+    	return new SimpleDateFormat("yyyy-MM-dd").format(d);
     }
     
 	public void execute(Tuple input, BasicOutputCollector collector) {
@@ -47,15 +49,14 @@ public class BoltSnDateSitePv extends BaseBasicBolt {
 		String sn = input.getString(1).trim();
 		String url = input.getString(4).trim();
 		try {
-			String date = new SimpleDateFormat("yyyy-MM-dd").format(new SimpleDateFormat("yyyy-MM-dd").parse(time));
+			String date = getDate(time);
 			String site = new URL(url).getHost();
 			String key = sn + "/" + date;
-			if (date != null && site != null)
-				_t_sn_date_site_pv.incrementColumnValue(key.getBytes(), "site".getBytes(), site.getBytes(), 1);
+			HTable t = new HTable(_hbconf, "t_zjj_sn_date_site_pv");
+			t.incrementColumnValue(key.getBytes(), "site".getBytes(), site.getBytes(), 1);
 		}
 		catch (Exception e) {
 			LOG.info("BoltSnDateSitePv.exception = ", e);
-			return;
 		}
 	}
 

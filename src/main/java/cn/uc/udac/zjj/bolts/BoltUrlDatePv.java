@@ -2,7 +2,9 @@ package cn.uc.udac.zjj.bolts;
 
 import java.io.IOException;
 import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
@@ -27,18 +29,18 @@ public class BoltUrlDatePv extends BaseBasicBolt {
 	static public Logger LOG = Logger.getLogger(BoltUrlDatePv.class);
 	private int _count = 0;
 	private OutputCollector _collector;
-	private HTable _t_url_date_pv;
+	Configuration _hbconf;
 	private long _pv_trigger;
 
     public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
         _collector = collector;
         _pv_trigger = (Integer)conf.get("BoltUrlDatePv.pv.trigger");
-        Configuration hbconf = HBaseConfiguration.create();
-        try {
-        	_t_url_date_pv = new HTable(hbconf, "t_date_url_pv");
-		} catch (IOException e) {
-			LOG.info("BoltUrlDatePv.exception = ", e);
-		}
+        _hbconf = HBaseConfiguration.create();
+    }
+    
+    private String getDate(String s) throws ParseException {
+    	Date d = new SimpleDateFormat("yyyy-MM-dd").parse(s);
+    	return new SimpleDateFormat("yyyy-MM-dd").format(d);
     }
     
 	public void execute(Tuple input, BasicOutputCollector collector) {
@@ -49,12 +51,11 @@ public class BoltUrlDatePv extends BaseBasicBolt {
 		String time = input.getString(0);
 		String url = input.getString(4);
 		try {
-			String date = new SimpleDateFormat("yyyy-MM-dd").format(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time));
-			if (date != null) {
-				long pv = _t_url_date_pv.incrementColumnValue(url.getBytes(), "pv".getBytes(), date.getBytes(), 1);
-				if (pv % _pv_trigger == 0)
-					_collector.emit(input, new Values(date, url));
-			}
+			String date = getDate(time);
+			HTable t = new HTable(_hbconf, "t_zjj_url_date_pv");
+			long pv = t.incrementColumnValue(url.getBytes(), "date".getBytes(), date.getBytes(), 1);
+			if (pv % _pv_trigger == 0)
+				_collector.emit(input, new Values(date, url));
 		}
 		catch (Exception e) {
 			LOG.info("BoltUrlDatePv.exception = ", e);

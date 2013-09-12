@@ -32,16 +32,11 @@ public class BoltWordSegment extends BaseBasicBolt {
 	static public Logger LOG = Logger.getLogger(BoltWordSegment.class);
 	private int _count = 0;
 	private OutputCollector _collector;
-	private HTable _t_site_date_word;
+	Configuration _hbconf;
 
     public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
         _collector = collector;
-        Configuration hbconf = HBaseConfiguration.create();
-        try {
-        	_t_site_date_word = new HTable(hbconf, "t_site_date_word");
-		} catch (IOException e) {
-			LOG.info("BoltWordSegment.exception =", e);
-		}
+        _hbconf = HBaseConfiguration.create();
     }
     
 	public void execute(Tuple input, BasicOutputCollector collector) {
@@ -55,12 +50,14 @@ public class BoltWordSegment extends BaseBasicBolt {
 		String key = site + "/" + date;
 		List parser = ToAnalysis.parse(txt);
 		Iterator<String> it = parser.iterator();
-		while (it.hasNext())
-			try {
-				_t_site_date_word.incrementColumnValue(key.getBytes(), "word".getBytes(), it.next().getBytes(), 1);
-			} catch (IOException e) {
-				LOG.info("BoltWordSegment.exception =", e);
-			}
+		try {
+			HTable t = new HTable(_hbconf, "t_zjj_site_date_word_pv");
+			while (it.hasNext())
+				t.incrementColumnValue(key.getBytes(), "word".getBytes(), it.next().getBytes(), 1);
+		}
+		catch (IOException e) {
+			LOG.info("BoltWordSegment.exception =", e);
+		}
 	}
 
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {

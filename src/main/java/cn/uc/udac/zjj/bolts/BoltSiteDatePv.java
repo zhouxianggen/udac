@@ -2,7 +2,9 @@ package cn.uc.udac.zjj.bolts;
 
 import java.io.IOException;
 import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
@@ -27,20 +29,18 @@ public class BoltSiteDatePv extends BaseBasicBolt {
 	private int _count = 0;
 	private OutputCollector _collector;
 	Configuration _hbconf;
-	//private HTable _t_site_date_pv;
 
 	public void prepare(Map conf, TopologyContext context,
 			OutputCollector collector) {
 		_collector = collector;
 		_hbconf = HBaseConfiguration.create();
-		Configuration hbconf = HBaseConfiguration.create();
-		//try {
-		//	_t_site_date_pv = new HTable(hbconf, "t_site_date_pv");
-		//} catch (IOException e) {
-		//	LOG.info("BoltSiteDatePv.prepare.exception = ", e);
-		//}
 	}
 
+	private String getDate(String s) throws ParseException {
+    	Date d = new SimpleDateFormat("yyyy-MM-dd").parse(s);
+    	return new SimpleDateFormat("yyyy-MM-dd").format(d);
+    }
+	
 	public void execute(Tuple input, BasicOutputCollector collector) {
 		if (input.size() != 5)
 			return;
@@ -49,13 +49,11 @@ public class BoltSiteDatePv extends BaseBasicBolt {
 		String time = input.getString(0);
 		String url = input.getString(4);
 		try {
-			String date = new SimpleDateFormat("yyyy-MM-dd").format(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time));
+			String date = getDate(time);
 			String site = new URL(url).getHost();
-			if (site != null && date != null) {
-				HTable t_site_date_pv = new HTable(_hbconf, "t_site_date_pv");
-				t_site_date_pv.incrementColumnValue(site.getBytes(), "pv".getBytes(), date.getBytes(), 1);
-				//_t_site_date_pv.incrementColumnValue(site.getBytes(), "pv".getBytes(), date.getBytes(), 1);
-			}
+			LOG.info(String.format("date = %s, site = %s", date, site));
+			HTable t = new HTable(_hbconf, "t_zjj_site_date_pv");
+			t.incrementColumnValue(site.getBytes(), "date".getBytes(), date.getBytes(), 1);
 		} catch (Exception e) {
 			LOG.info("BoltSiteDatePv.execute.exception = ", e);
 		}
