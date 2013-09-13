@@ -17,22 +17,22 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Tuple;
 
-public class BoltSiteDatePv extends BaseRichBolt {
+public class BoltDateSitePv extends BaseRichBolt {
 
-	static public Logger LOG = Logger.getLogger(BoltSiteDatePv.class);
+	static public Logger LOG = Logger.getLogger(BoltDateSitePv.class);
 	private int _count = 0;
 	private OutputCollector _collector;
-	private HTable _t_site_date_pv;
+	private HTable _t_date_site_pv;
 
 	@Override
 	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
 		_collector = collector;
 		Configuration hbconf = HBaseConfiguration.create();
 		try {
-			_t_site_date_pv = new HTable(hbconf, "t_zjj_site_date_pv");
+			_t_date_site_pv = new HTable(hbconf, "t_zjj_date_site_pv");
     	}
     	catch (Exception e) {
-    		LOG.info("BoltSiteDatePv.prepare.exception:", e);
+    		LOG.info("BoltDateSitePv.prepare.exception:", e);
     	}
 	}
 
@@ -46,16 +46,16 @@ public class BoltSiteDatePv extends BaseRichBolt {
 		if (input.size() != 5)
 			return;
 		if (_count++ % 1000 == 0)
-			LOG.info(String.format("BoltSiteDatePv.count = %d", _count));
+			LOG.info(String.format("BoltDateSitePv.count = %d", _count));
 		String time = input.getString(0);
 		String url = input.getString(4);
 		try {
 			String date = getDate(time);
 			String site = new URL(url).getHost();
 			LOG.info(String.format("date = %s, site = %s", date, site));
-			_t_site_date_pv.incrementColumnValue(site.getBytes(), "date".getBytes(), date.getBytes(), 1);
+			_t_date_site_pv.incrementColumnValue(site.getBytes(), "date".getBytes(), date.getBytes(), 1);
 		} catch (Exception e) {
-			LOG.info("BoltSiteDatePv.execute.exception:", e);
+			LOG.info("BoltDateSitePv.execute.exception:", e);
 		}
 	}
 

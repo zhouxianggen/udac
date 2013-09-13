@@ -19,24 +19,24 @@ import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 
 
-public class BoltUrlDatePv extends BaseRichBolt {
+public class BoltDateUrlPv extends BaseRichBolt {
 
-	static public Logger LOG = Logger.getLogger(BoltUrlDatePv.class);
+	static public Logger LOG = Logger.getLogger(BoltDateUrlPv.class);
 	private int _count = 0;
 	private OutputCollector _collector;
 	private long _pv_trigger;
-	private HTable _t_url_date_pv;
+	private HTable _t_date_url_pv;
 
 	@Override
 	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
 		_collector = collector;
-		_pv_trigger = (Long)conf.get("BoltUrlDatePv.pv.trigger");
+		_pv_trigger = (Long)conf.get("BoltDateUrlPv.pv.trigger");
 		Configuration hbconf = HBaseConfiguration.create();
 		try {
-			_t_url_date_pv = new HTable(hbconf, "t_zjj_url_date_pv");
+			_t_date_url_pv = new HTable(hbconf, "t_zjj_date_url_pv");
     	}
     	catch (Exception e) {
-    		LOG.info("BoltUrlDatePv.prepare.exception:", e);
+    		LOG.info("BoltDateUrlPv.prepare.exception:", e);
     	}
 	}
     
@@ -50,17 +50,17 @@ public class BoltUrlDatePv extends BaseRichBolt {
 		if (input.size() != 5)
 			return;
 		if (_count++ % 1000 == 0)
-			LOG.info(String.format("BoltUrlDatePv.count = %d", _count));
+			LOG.info(String.format("BoltDateUrlPv.count = %d", _count));
 		String time = input.getString(0);
 		String url = input.getString(4);
 		try {
 			String date = getDate(time);
-			long pv = _t_url_date_pv.incrementColumnValue(url.getBytes(), "date".getBytes(), date.getBytes(), 1);
+			long pv = _t_date_url_pv.incrementColumnValue(url.getBytes(), "date".getBytes(), date.getBytes(), 1);
 			if (pv % _pv_trigger == 0)
 				_collector.emit(input, new Values(date, url));
 		}
 		catch (Exception e) {
-			LOG.info("BoltUrlDatePv.execute.exception:", e);
+			LOG.info("BoltDateUrlPv.execute.exception:", e);
 		}
 	}
 
