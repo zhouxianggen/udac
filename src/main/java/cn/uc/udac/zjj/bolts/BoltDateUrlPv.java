@@ -57,6 +57,7 @@ public class BoltDateUrlPv extends BaseRichBolt {
 			String date = getDate(time);
 			String key = date + "/" + url;
 			long pv = _t_date_url_pv.incrementColumnValue(key.getBytes(), "m".getBytes(), "pv".getBytes(), 1);
+			LOG.info(String.format("BoltDateUrlPv.execute: date=%s, url=%s, pv=%d", date, url, pv));
 			if (pv % _pv_trigger == 0)
 				_collector.emit(input, new Values(date, url));
 		}

@@ -52,6 +52,7 @@ public class BoltSnDateSitePv extends BaseBasicBolt {
 		try {
 			String date = getDate(time);
 			String site = new URL(url).getHost();
+			LOG.info(String.format("BoltSnDateSitePv.execute: sn=%s, date=%s, site=%s", sn, date, site));
 			String key = sn + "/" + date;
 			_t_sn_date_site_pv.incrementColumnValue(key.getBytes(), "site".getBytes(), site.getBytes(), 1);
 		}
