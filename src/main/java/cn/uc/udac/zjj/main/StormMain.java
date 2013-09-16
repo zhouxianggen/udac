@@ -22,7 +22,7 @@ public class StormMain {
 		builder.setBolt("b_sn_date_site_pv", new BoltSnDateSitePv(), 1).shuffleGrouping("s_log");
 		builder.setBolt("b_date_site_pv", new BoltDateSitePv(), 1).shuffleGrouping("s_log");
 		builder.setBolt("b_date_url_pv", new BoltDateUrlPv(), 1).shuffleGrouping("s_log");
-		builder.setBolt("b_crawler", new BoltCrawler(), 64).shuffleGrouping("b_date_url_pv");
+		builder.setBolt("b_crawler", new BoltCrawler(), 65).shuffleGrouping("b_date_url_pv");
 		builder.setBolt("b_parser", new BoltParser(), 1).shuffleGrouping("b_crawler");
 		
 		Config conf = new Config();
