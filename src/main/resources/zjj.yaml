@@ -1,6 +1,10 @@
 
-SpoutLog.ucmq.host: "10.34.102.125"
+SpoutLog.ucmq.hosts:
+  - "pagediff1"
+  - "pagediff2"
+  - "pagediff3"
+  - "pagediff4"
+  - "pagediff5" 
 SpoutLog.ucmq.port: 8803
 SpoutLog.ucmq.qname: "zjj"
-
 BoltDateUrlPv.pv.trigger: 1000

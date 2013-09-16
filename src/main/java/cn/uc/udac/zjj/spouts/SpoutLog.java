@@ -11,6 +11,8 @@ import cn.uc.udac.mqs.UCMessageQueue;
 
 import org.apache.log4j.Logger;
 
+import com.sun.tools.javac.util.List;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
@@ -20,29 +22,33 @@ public class SpoutLog extends BaseRichSpout {
 	static public Logger LOG = Logger.getLogger(SpoutLog.class);
 	private int _count = 0;
 	private SpoutOutputCollector _collector;
-	private UCMessageQueue _ucmq;
+	private UCMessageQueue[] _mqs;
 
 	@Override
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
 		_collector = collector;
-		String host = (String)conf.get("SpoutLog.ucmq.host");
+		List<String> hosts = (List<String>)conf.get("SpoutLog.ucmq.hosts");
 		int port = ( (Long)conf.get("SpoutLog.ucmq.port") ).intValue();
 		String qname = (String)conf.get("SpoutLog.ucmq.qname");
-		_ucmq = new UCMessageQueue(host, port, qname);
+		_mqs = new UCMessageQueue[hosts.size()];
+		for (int i=0; i<hosts.size(); i+=1)
+			_mqs[i] = new UCMessageQueue(hosts.get(i), port, qname);
 	}
 
 	@Override
 	public void nextTuple() {
-		try {
-			String[] parts = _ucmq.get().split("`");
-			if (parts.length != 5)
-				return;
-			if (_count++ % 1000 == 0)
-				LOG.info(String.format("mq.get=%s, count=%d", Arrays.toString(parts), _count));
-			_collector.emit(new Values(parts));
-		}
-		catch (IOException e) {
-			LOG.info("SpoutLog.nextTuple.exception:", e);
+		for (int i=0; i<_mqs.length; i+=1) {
+			try {
+				String[] parts = _mqs[i].get().split("`");
+				if (parts.length != 5)
+					continue;
+				if (_count++ % 1000 == 0)
+					LOG.info(String.format("mq.get=%s, count=%d", Arrays.toString(parts), _count));
+				_collector.emit(new Values(parts));
+			}
+			catch (IOException e) {
+				LOG.info("SpoutLog.nextTuple.exception:", e);
+			}
 		}
 	}
 

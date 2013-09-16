@@ -23,16 +23,16 @@ public class BoltParser extends BaseRichBolt {
 	static public Logger LOG = Logger.getLogger(BoltParser.class);
 	private int _count = 0;
 	private OutputCollector _collector;
-	private HTable _t_site_date_word_pv;
-	private HTable _t_word_date_site_df;
+	private HTable _t_date_site_word_pv;
+	private HTable _t_date_word_site_df;
 
 	@Override
 	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
 		_collector = collector;
 		Configuration hbconf = HBaseConfiguration.create();
 		try {
-			_t_site_date_word_pv = new HTable(hbconf, "t_zjj_site_date_word_pv");
-			_t_word_date_site_df = new HTable(hbconf, "t_zjj_word_date_site_df");
+			_t_date_site_word_pv = new HTable(hbconf, "t_zjj_date_site_word_pv");
+			_t_date_word_site_df = new HTable(hbconf, "t_zjj_date_word_site_df");
     	}
     	catch (Exception e) {
     		LOG.info("BoltParser.prepare.exception:", e);
@@ -48,16 +48,16 @@ public class BoltParser extends BaseRichBolt {
 		String site = input.getString(0);
 		String date = input.getString(1);
 		String txt = input.getString(2);
-		String key = site + "/" + date;
+		String key = date + "/" + site;
 		List<Term> parser = ToAnalysis.parse(txt);
 		Iterator<Term> it = parser.iterator();
 		try {
 			while (it.hasNext()) {
 				String word = it.next().getName();
 				if (word.length() <= 1) continue;
-				long pv = _t_site_date_word_pv.incrementColumnValue(key.getBytes(), "word".getBytes(), word.getBytes(), 1);
+				long pv = _t_date_site_word_pv.incrementColumnValue(key.getBytes(), "word".getBytes(), word.getBytes(), 1);
 				if (pv == 1)
-					_t_word_date_site_df.incrementColumnValue(word.getBytes(), "date".getBytes(), date.getBytes(), 1);
+					_t_date_word_site_df.incrementColumnValue(word.getBytes(), "date".getBytes(), date.getBytes(), 1);
 			}
 		}
 		catch (IOException e) {

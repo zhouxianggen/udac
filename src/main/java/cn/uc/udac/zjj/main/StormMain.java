@@ -21,9 +21,9 @@ public class StormMain {
 		builder.setSpout("s_log", new SpoutLog(), 16);
 		builder.setBolt("b_sn_date_site_pv", new BoltSnDateSitePv(), 1).shuffleGrouping("s_log");
 		builder.setBolt("b_date_site_pv", new BoltDateSitePv(), 1).shuffleGrouping("s_log");
-		builder.setBolt("b_date_url_pv", new BoltDateUrlPv(), 16).shuffleGrouping("s_log");
-		builder.setBolt("b_crawler", new BoltCrawler(), 32).shuffleGrouping("b_date_url_pv");
-		builder.setBolt("b_parser", new BoltParser(), 16).shuffleGrouping("b_crawler");
+		builder.setBolt("b_date_url_pv", new BoltDateUrlPv(), 1).shuffleGrouping("s_log");
+		builder.setBolt("b_crawler", new BoltCrawler(), 64).shuffleGrouping("b_date_url_pv");
+		builder.setBolt("b_parser", new BoltParser(), 1).shuffleGrouping("b_crawler");
 		
 		Config conf = new Config();
 		conf.setNumWorkers(5);
