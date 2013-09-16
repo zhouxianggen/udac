@@ -11,10 +11,9 @@ import cn.uc.udac.mqs.UCMessageQueue;
 
 import org.apache.log4j.Logger;
 
-import com.sun.tools.javac.util.List;
-
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 public class SpoutLog extends BaseRichSpout {
