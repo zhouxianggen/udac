@@ -48,6 +48,7 @@ public class BoltParser extends BaseRichBolt {
 		String site = input.getString(0);
 		String date = input.getString(1);
 		String txt = input.getString(2);
+		LOG.info(String.format("BoltParser.execute.txt:%s", txt));
 		String key = date + "/" + site;
 		List<Term> parser = ToAnalysis.parse(txt);
 		Iterator<Term> it = parser.iterator();
