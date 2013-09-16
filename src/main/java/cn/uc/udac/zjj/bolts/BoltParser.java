@@ -24,6 +24,7 @@ public class BoltParser extends BaseRichBolt {
 	private int _count = 0;
 	private OutputCollector _collector;
 	private HTable _t_site_date_word_pv;
+	private HTable _t_word_date_site_df;
 
 	@Override
 	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
@@ -31,6 +32,7 @@ public class BoltParser extends BaseRichBolt {
 		Configuration hbconf = HBaseConfiguration.create();
 		try {
 			_t_site_date_word_pv = new HTable(hbconf, "t_zjj_site_date_word_pv");
+			_t_word_date_site_df = new HTable(hbconf, "t_zjj_word_date_site_df");
     	}
     	catch (Exception e) {
     		LOG.info("BoltParser.prepare.exception:", e);
@@ -52,8 +54,10 @@ public class BoltParser extends BaseRichBolt {
 		try {
 			while (it.hasNext()) {
 				String word = it.next().getName();
-				if (word.length() > 1)
-					_t_site_date_word_pv.incrementColumnValue(key.getBytes(), "word".getBytes(), word.getBytes(), 1);
+				if (word.length() <= 1) continue;
+				long pv = _t_site_date_word_pv.incrementColumnValue(key.getBytes(), "word".getBytes(), word.getBytes(), 1);
+				if (pv == 1)
+					_t_word_date_site_df.incrementColumnValue(word.getBytes(), "date".getBytes(), date.getBytes(), 1);
 			}
 		}
 		catch (IOException e) {
