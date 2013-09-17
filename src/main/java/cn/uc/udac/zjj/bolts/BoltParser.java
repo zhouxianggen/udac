@@ -15,6 +15,8 @@ import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Tuple;
+
+import org.ansj.recognition.NatureRecognition;
 import org.ansj.splitWord.analysis.ToAnalysis;
 import org.ansj.domain.Term;
 
@@ -39,6 +41,13 @@ public class BoltParser extends BaseRichBolt {
     	}
 	}
     
+	private boolean check_word(String word, String pos) {
+		if (word.length() <= 1) return false;
+		if (pos.charAt(0) == 'n') return true;
+		if (pos.charAt(0) == 'v') return true;
+		return false;
+	}
+	
 	@Override
 	public void execute(Tuple input) {
 		if (input.size() != 3)
@@ -50,19 +59,21 @@ public class BoltParser extends BaseRichBolt {
 		String txt = input.getString(2);
 		LOG.info(String.format("BoltParser.execute.txt:%s", txt));
 		String key = date + "/" + site;
-		List<Term> parser = ToAnalysis.parse(txt);
-		Iterator<Term> it = parser.iterator();
-		try {
-			while (it.hasNext()) {
-				String word = it.next().getName();
-				if (word.length() <= 1) continue;
-				long pv = _t_date_site_word_pv.incrementColumnValue(key.getBytes(), "word".getBytes(), word.getBytes(), 1);
-				if (pv == 1)
-					_t_date_word_site_df.incrementColumnValue(word.getBytes(), "date".getBytes(), date.getBytes(), 1);
+		List<Term> terms = ToAnalysis.parse(txt);
+		new NatureRecognition(terms).recognition();
+		for (int i=0; i<terms.size(); i+=1) {
+			Term t = (Term)terms.get(i);
+			String word = t.getName();
+			String pos = t.getNatrue().natureStr;
+			if (!check_word(word, pos)) continue;
+			try {
+			long pv = _t_date_site_word_pv.incrementColumnValue(key.getBytes(), "word".getBytes(), word.getBytes(), 1);
+			if (pv == 1)
+				_t_date_word_site_df.incrementColumnValue(word.getBytes(), "date".getBytes(), date.getBytes(), 1);
 			}
-		}
-		catch (IOException e) {
-			LOG.info("BoltParser.execute.exception:", e);
+			catch (IOException e) {
+				LOG.info("BoltParser.execute.exception:", e);
+			}
 		}
 	}
 

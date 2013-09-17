@@ -7,4 +7,4 @@ SpoutLog.ucmq.hosts:
     - "pagediff5" 
 SpoutLog.ucmq.port: 8803
 SpoutLog.ucmq.qname: "zjj"
-BoltDateUrlPv.pv.trigger: 200
+BoltDateUrlPv.pv.trigger: 100
