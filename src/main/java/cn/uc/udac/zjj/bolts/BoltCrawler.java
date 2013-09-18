@@ -5,6 +5,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -24,19 +31,40 @@ public class BoltCrawler extends BaseRichBolt {
 	static public Logger LOG = Logger.getLogger(BoltCrawler.class);
 	private int _count = 0;
 	private OutputCollector _collector;
+	private HTable _t_url_text;
 
 	@Override
 	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
 		_collector = collector;
+		Configuration hbconf = HBaseConfiguration.create();
+		try {
+			_t_url_text = new HTable(hbconf, "t_zjj_url_text");
+    	}
+    	catch (Exception e) {
+    		LOG.info("BoltCrawler.prepare.exception:", e);
+    	}
     }
     
 	private String getText(String url) {
 		String text = "";
 		try {
-			Document doc = Jsoup.connect(url).get();
-			Elements ps = doc.getElementsByTag("p");
-			for (Element p : ps)
-				text += p.text() + "\n";
+			Get row = new Get(url.getBytes());
+			row.addColumn("m".getBytes(), "text".getBytes());
+			Result r = _t_url_text.get(row);
+			if (!r.isEmpty())
+				text = r.getValue("m".getBytes(), "text".getBytes()).toString();
+			else {
+				Document doc = Jsoup.connect(url).get();
+				Elements ps = doc.getElementsByTag("p");
+				for (Element p : ps)
+					text += p.text() + "\n";
+				if (text.length() > 0) {
+					Put puts = new Put(url.getBytes());
+					puts.add("m".getBytes(), "text".getBytes(), text.getBytes());
+					puts.add("m".getBytes(), "title".getBytes(), doc.title().getBytes());
+					_t_url_text.put(puts);
+				}
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
