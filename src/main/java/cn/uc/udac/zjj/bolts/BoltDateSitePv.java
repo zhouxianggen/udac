@@ -52,7 +52,7 @@ public class BoltDateSitePv extends BaseRichBolt {
 			String site = new URL(url).getHost();
 			String key = date + "/" + site;
 			long pv = _t_date_site_pv.incrementColumnValue(key.getBytes(), "m".getBytes(), "pv".getBytes(), 1);
-			if (_count % 1000 == 0)
+			if (_count++ % 1000 == 0)
 				LOG.info(String.format("BoltDateSitePv.execute(%d): date=%s, site=%s, pv=%d", _count, date, site, pv));
 		} catch (Exception e) {
 			LOG.info("BoltDateSitePv.execute.exception:", e);

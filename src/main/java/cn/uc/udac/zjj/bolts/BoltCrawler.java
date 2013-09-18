@@ -81,7 +81,7 @@ public class BoltCrawler extends BaseRichBolt {
 			String url = input.getString(1);
 			String site = new URL(url).getHost();
 			String text = getText(url);
-			if (_count % 1000 == 0)
+			if (_count++ % 1000 == 0)
 				LOG.info(String.format("BoltCrawler.execute(%d): date=%s, url=%s, text=%s", _count, date, url, text));
 			if (site.length()>0 && date.length()>0 && text.length()>0)
 				_collector.emit(input, new Values(site, date, text));

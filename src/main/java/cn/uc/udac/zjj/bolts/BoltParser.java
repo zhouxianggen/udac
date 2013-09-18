@@ -58,7 +58,7 @@ public class BoltParser extends BaseRichBolt {
 		String key = date + "/" + site;
 		List<Term> terms = ToAnalysis.parse(txt);
 		new NatureRecognition(terms).recognition();
-		if (_count % 1000 == 0)
+		if (_count++ % 1000 == 0)
 			LOG.info(String.format("BoltParser.execute(%d): text=%s", _count, terms.toString()));
 		for (int i=0; i<terms.size(); i+=1) {
 			Term t = (Term)terms.get(i);
