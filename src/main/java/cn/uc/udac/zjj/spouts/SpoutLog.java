@@ -19,9 +19,9 @@ import java.util.Map;
 public class SpoutLog extends BaseRichSpout {
 	 
 	static public Logger LOG = Logger.getLogger(SpoutLog.class);
-	private int _count = 0;
 	private SpoutOutputCollector _collector;
 	private UCMessageQueue[] _mqs;
+	private long _count = 0;
 
 	@Override
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
@@ -42,7 +42,7 @@ public class SpoutLog extends BaseRichSpout {
 				if (parts.length != 5)
 					continue;
 				if (_count++ % 1000 == 0)
-					LOG.info(String.format("mq.get=%s, count=%d", Arrays.toString(parts), _count));
+					LOG.info(String.format("SpoutLog.nextTuple(%d): mq.get=%s", _count, Arrays.toString(parts)));
 				_collector.emit(new Values(parts));
 			}
 			catch (IOException e) {

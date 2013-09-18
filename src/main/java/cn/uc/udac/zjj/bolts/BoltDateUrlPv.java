@@ -22,10 +22,10 @@ import backtype.storm.tuple.Values;
 public class BoltDateUrlPv extends BaseRichBolt {
 
 	static public Logger LOG = Logger.getLogger(BoltDateUrlPv.class);
-	private int _count = 0;
 	private OutputCollector _collector;
 	private long _pv_trigger;
 	private HTable _t_date_url_pv;
+	private long _count = 0;
 
 	@Override
 	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
@@ -49,15 +49,14 @@ public class BoltDateUrlPv extends BaseRichBolt {
 	public void execute(Tuple input) {
 		if (input.size() != 5)
 			return;
-		if (_count++ % 1000 == 0)
-			LOG.info(String.format("BoltDateUrlPv.count = %d", _count));
-		String time = input.getString(0);
-		String url = input.getString(4);
 		try {
+			String time = input.getString(0);
+			String url = input.getString(4);
 			String date = getDate(time);
 			String key = date + "/" + url;
 			long pv = _t_date_url_pv.incrementColumnValue(key.getBytes(), "m".getBytes(), "pv".getBytes(), 1);
-			LOG.info(String.format("BoltDateUrlPv.execute: date=%s, url=%s, pv=%d", date, url, pv));
+			if (_count % 1000 == 0)
+				LOG.info(String.format("BoltDateUrlPv.execute(%d): date=%s, url=%s, pv=%d", _count, date, url, pv));
 			if (pv % _pv_trigger == 0)
 				_collector.emit(input, new Values(date, url));
 		}

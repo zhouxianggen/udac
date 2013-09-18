@@ -29,9 +29,9 @@ import backtype.storm.tuple.Values;
 public class BoltCrawler extends BaseRichBolt {
 
 	static public Logger LOG = Logger.getLogger(BoltCrawler.class);
-	private int _count = 0;
 	private OutputCollector _collector;
 	private HTable _t_url_text;
+	private long _count = 0;
 
 	@Override
 	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
@@ -76,14 +76,15 @@ public class BoltCrawler extends BaseRichBolt {
 	public void execute(Tuple input) {
 		if (input.size() != 2)
 			return;
-		if (_count++ % 1000 == 0)
-			LOG.info(String.format("BoltCrawler.count = %d", _count));
-		String date = input.getString(0);
-		String url = input.getString(1);
 		try {
+			String date = input.getString(0);
+			String url = input.getString(1);
 			String site = new URL(url).getHost();
 			String text = getText(url);
-			_collector.emit(input, new Values(site, date, text));
+			if (_count % 1000 == 0)
+				LOG.info(String.format("BoltCrawler.execute(%d): date=%s, url=%s, text=%s", _count, date, url, text));
+			if (site.length()>0 && date.length()>0 && text.length()>0)
+				_collector.emit(input, new Values(site, date, text));
 		}
 		catch (Exception e) {
 			LOG.info("BoltCrawler.execute.exception:", e);

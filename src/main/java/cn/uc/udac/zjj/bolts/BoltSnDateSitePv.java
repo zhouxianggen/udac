@@ -21,8 +21,8 @@ import backtype.storm.tuple.Tuple;
 public class BoltSnDateSitePv extends BaseBasicBolt {
 
 	static public Logger LOG = Logger.getLogger(BoltSnDateSitePv.class);
-	private int _count = 0;
 	private HTable _t_sn_date_site_pv;
+	private long _count = 0;
 
 	@Override
 	public void prepare(Map stormConf, TopologyContext context) {
@@ -44,17 +44,16 @@ public class BoltSnDateSitePv extends BaseBasicBolt {
 	public void execute(Tuple input, BasicOutputCollector collector) {
 		if (input.size() != 5)
 			return;
-		if (_count++ % 1000 == 0)
-			LOG.info(String.format("BoltSnDateSitePv.count = %d", _count));
-		String time = input.getString(0).trim();
-		String sn = input.getString(1).trim();
-		String url = input.getString(4).trim();
 		try {
+			String time = input.getString(0).trim();
+			String sn = input.getString(1).trim();
+			String url = input.getString(4).trim();
 			String date = getDate(time);
 			String site = new URL(url).getHost();
-			LOG.info(String.format("BoltSnDateSitePv.execute: sn=%s, date=%s, site=%s", sn, date, site));
 			String key = sn + "/" + date;
-			_t_sn_date_site_pv.incrementColumnValue(key.getBytes(), "site".getBytes(), site.getBytes(), 1);
+			long pv = _t_sn_date_site_pv.incrementColumnValue(key.getBytes(), "site".getBytes(), site.getBytes(), 1);
+			if (_count++ % 1000 == 0)
+				LOG.info(String.format("BoltSnDateSitePv.execute(%d): sn=%s, date=%s, site=%s, pv=%d", _count, sn, date, site, pv));
 		}
 		catch (Exception e) {
 			LOG.info("BoltSnDateSitePv.execute.exception:", e);

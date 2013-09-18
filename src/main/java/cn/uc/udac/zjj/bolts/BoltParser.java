@@ -23,10 +23,10 @@ import org.ansj.domain.Term;
 public class BoltParser extends BaseRichBolt {
 
 	static public Logger LOG = Logger.getLogger(BoltParser.class);
-	private int _count = 0;
 	private OutputCollector _collector;
 	private HTable _t_date_site_word_pv;
 	private HTable _t_date_word_site_df;
+	private long _count = 0;
 
 	@Override
 	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
@@ -52,15 +52,14 @@ public class BoltParser extends BaseRichBolt {
 	public void execute(Tuple input) {
 		if (input.size() != 3)
 			return;
-		if (_count++ % 1000 == 0)
-			LOG.info(String.format("BoltParser.count = %d", _count));
 		String site = input.getString(0);
 		String date = input.getString(1);
 		String txt = input.getString(2);
-		LOG.info(String.format("BoltParser.execute.txt:%s", txt));
 		String key = date + "/" + site;
 		List<Term> terms = ToAnalysis.parse(txt);
 		new NatureRecognition(terms).recognition();
+		if (_count % 1000 == 0)
+			LOG.info(String.format("BoltParser.execute(%d): text=%s", _count, terms.toString()));
 		for (int i=0; i<terms.size(); i+=1) {
 			Term t = (Term)terms.get(i);
 			String word = t.getName();
