@@ -96,7 +96,7 @@ public class BoltParser extends BaseRichBolt {
 		String site = input.getString(0);
 		String date = input.getString(1);
 		String title = input.getString(2);
-		String text = input.getString(4);
+		String text = input.getString(3);
 		String key = site;
 		try {
 			String[] persons = getPersons(title);
