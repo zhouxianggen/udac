@@ -29,20 +29,16 @@ import org.ansj.domain.Term;
 public class BoltParser extends BaseRichBolt {
 
 	static public Logger LOG = Logger.getLogger(BoltParser.class);
-	private OutputCollector _collector;
-	private HTable _t_date_site_word_pv;
-	private HTable _t_date_word_site_df;
+	private HTable _t_site_feature;
 	private String _ner_server;
 	private long _count = 0;
 
 	@Override
 	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
-		_collector = collector;
 		_ner_server = (String)conf.get("BoltParser.ner.server");
 		Configuration hbconf = HBaseConfiguration.create();
 		try {
-			_t_date_site_word_pv = new HTable(hbconf, "t_zjj_date_site_word_pv");
-			_t_date_word_site_df = new HTable(hbconf, "t_zjj_date_word_site_df");
+			_t_site_feature = new HTable(hbconf, "t_zjj_site_feature");
     	}
     	catch (Exception e) {
     		LOG.info("BoltParser.prepare.exception:", e);
@@ -78,7 +74,7 @@ public class BoltParser extends BaseRichBolt {
 		writer.write(data);
 		writer.flush();
 		writer.close();
-		InputStreamReader reader  = new InputStreamReader(conn.getInputStream(),"utf-8");
+		InputStreamReader reader  = new InputStreamReader(conn.getInputStream(), "utf-8");
 		BufferedReader breader = new BufferedReader(reader);
 		String content = null;
 		String result = null;
@@ -101,14 +97,11 @@ public class BoltParser extends BaseRichBolt {
 		String date = input.getString(1);
 		String title = input.getString(2);
 		String text = input.getString(4);
-		String key = date + "/" + site;
+		String key = site;
 		try {
 			String[] persons = getPersons(title);
 			for (int i=0; i<persons.length; i+=1)
-				_t_date_site_word_pv.incrementColumnValue(key.getBytes(), "person1".getBytes(), persons[i].getBytes(), 1);
-			persons = getPersons(text);
-			for (int i=0; i<persons.length; i+=1)
-				_t_date_site_word_pv.incrementColumnValue(key.getBytes(), "person2".getBytes(), persons[i].getBytes(), 1);
+				_t_site_feature.incrementColumnValue(key.getBytes(), "person".getBytes(), persons[i].getBytes(), 1);
 		}
 		catch (Exception e) {
 			LOG.info("BoltParser.execute.exception:", e);
@@ -116,10 +109,7 @@ public class BoltParser extends BaseRichBolt {
 		try {
 			ArrayList<String> words = getWords(title);
 			for (int i=0; i<words.size(); i+=1)
-				_t_date_site_word_pv.incrementColumnValue(key.getBytes(), "word1".getBytes(), words.get(i).getBytes(), 1);
-			words = getWords(text);
-			for (int i=0; i<words.size(); i+=1)
-				_t_date_site_word_pv.incrementColumnValue(key.getBytes(), "word2".getBytes(), words.get(i).getBytes(), 1);
+				_t_site_feature.incrementColumnValue(key.getBytes(), "word".getBytes(), words.get(i).getBytes(), 1);
 		}
 		catch (Exception e) {
 			LOG.info("BoltParser.execute.exception:", e);
