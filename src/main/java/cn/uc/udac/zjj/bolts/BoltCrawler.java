@@ -45,6 +45,40 @@ public class BoltCrawler extends BaseRichBolt {
     	}
     }
     
+	private String[] urlOpen(String url) {
+		String[] a = new String[2];
+		String title = "";
+		String text = "";
+		try {
+			Get row = new Get(url.getBytes());
+			row.addColumn("m".getBytes(), "text".getBytes());
+			row.addColumn("m".getBytes(), "title".getBytes());
+			Result r = _t_url_text.get(row);
+			if (!r.isEmpty()) {
+				title = r.getValue("m".getBytes(), "title".getBytes()).toString();
+				text = r.getValue("m".getBytes(), "text".getBytes()).toString();
+			}
+			else {
+				Document doc = Jsoup.connect(url).get();
+				Elements ps = doc.getElementsByTag("p");
+				title = doc.title();
+				for (Element p : ps)
+					text += p.text() + "\n";
+				if (title.length()>0 || text.length()>0) {
+					Put puts = new Put(url.getBytes());
+					puts.add("m".getBytes(), "text".getBytes(), text.getBytes());
+					puts.add("m".getBytes(), "title".getBytes(), title.getBytes());
+					_t_url_text.put(puts);
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		a[0] = title;
+		a[1] = text;
+		return a;
+	}
+	
 	private String getText(String url) {
 		String text = "";
 		try {
@@ -80,11 +114,13 @@ public class BoltCrawler extends BaseRichBolt {
 			String date = input.getString(0);
 			String url = input.getString(1);
 			String site = new URL(url).getHost();
-			String text = getText(url);
+			String[] a = urlOpen(url);
+			String title = a[0];
+			String text = a[1];
 			if (_count++ % 1000 == 0)
-				LOG.info(String.format("BoltCrawler.execute(%d): date=%s, url=%s, text=%s", _count, date, url, text));
+				LOG.info(String.format("BoltCrawler.execute(%d): date=%s, url=%s, title=%s, text=%s", _count, date, url, title, text));
 			if (site.length()>0 && date.length()>0 && text.length()>0)
-				_collector.emit(input, new Values(site, date, text));
+				_collector.emit(input, new Values(site, date, title, text));
 		}
 		catch (Exception e) {
 			LOG.info("BoltCrawler.execute.exception:", e);
@@ -93,7 +129,7 @@ public class BoltCrawler extends BaseRichBolt {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("site", "date", "text"));
+		declarer.declare(new Fields("site", "date", "title", "text"));
 	}
 
 }

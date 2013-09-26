@@ -8,3 +8,4 @@ SpoutLog.ucmq.hosts:
 SpoutLog.ucmq.port: 8803
 SpoutLog.ucmq.qname: "zjj"
 BoltDateUrlPv.pv.trigger: 100
+BoltParser.ner.server: http://10.34.102.124:8081/ner
