@@ -2,7 +2,9 @@ package cn.uc.udac.zjj.bolts;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
@@ -30,7 +32,7 @@ public class BoltCrawler extends BaseRichBolt {
 
 	static public Logger LOG = Logger.getLogger(BoltCrawler.class);
 	private OutputCollector _collector;
-	private HTable _t_url_text;
+	private HTable _t_pages;
 	private long _count = 0;
 
 	@Override
@@ -38,72 +40,51 @@ public class BoltCrawler extends BaseRichBolt {
 		_collector = collector;
 		Configuration hbconf = HBaseConfiguration.create();
 		try {
-			_t_url_text = new HTable(hbconf, "t_zjj_url_text");
+			_t_pages = new HTable(hbconf, "t_pages");
     	}
     	catch (Exception e) {
     		LOG.info("BoltCrawler.prepare.exception:", e);
     	}
     }
     
-	private String[] urlOpen(String url) {
-		String[] a = new String[2];
+	private String getKey(String str) throws Exception {
+		String key = "";
+		URI uri = new URI(str);
+		String scheme = uri.getScheme();
+		String host = uri.getHost();
+		String fragment = uri.getFragment();
+		if (scheme.length() > 0)
+			key = str.substring(scheme.length()+3);
+		key = key.substring(host.length());
+		String[] ps = host.split("\\.");
+		if (ps.length > 0)
+			key = ps[0] + key;
+		for (int i = 1; i < ps.length; i+=1)
+			key = ps[i] + "." + key;
+		if (fragment != null)
+			key = key.substring(0, key.length()-fragment.length()-1);
+		return key;
+	}
+	
+	private String[] urlOpen(String url) throws Exception {
 		String title = "";
 		String text = "";
-		try {
-			Get row = new Get(url.getBytes());
-			row.addColumn("m".getBytes(), "text".getBytes());
-			row.addColumn("m".getBytes(), "title".getBytes());
-			Result r = _t_url_text.get(row);
-			if (!r.isEmpty()) {
-				title = r.getValue("m".getBytes(), "title".getBytes()).toString();
-				text = r.getValue("m".getBytes(), "text".getBytes()).toString();
-			}
-			else {
-				Document doc = Jsoup.connect(url).get();
-				Elements ps = doc.getElementsByTag("p");
-				title = doc.title();
-				for (Element p : ps)
-					text += p.text() + "\n";
-				if (title.length()>0 || text.length()>0) {
-					Put puts = new Put(url.getBytes());
-					puts.add("m".getBytes(), "text".getBytes(), text.getBytes());
-					puts.add("m".getBytes(), "title".getBytes(), title.getBytes());
-					_t_url_text.put(puts);
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		String key = getKey(url);
+		Get row = new Get(key.getBytes());
+		row.addColumn("m".getBytes(), "Data".getBytes());
+		Result r = _t_pages.get(row);
+		if (!r.isEmpty()) {
+			String page = r.getValue("m".getBytes(), "Data".getBytes()).toString();
+			Document doc = Jsoup.parse(page);
+			Elements ps = doc.getElementsByTag("p");
+			title = doc.title();
+			for (Element p : ps)
+				text += p.text() + "\n";
 		}
+		String[] a = new String[2];
 		a[0] = title;
 		a[1] = text;
 		return a;
-	}
-	
-	private String getText(String url) {
-		String text = "";
-		try {
-			Get row = new Get(url.getBytes());
-			row.addColumn("m".getBytes(), "text".getBytes());
-			Result r = _t_url_text.get(row);
-			if (!r.isEmpty())
-				text = r.getValue("m".getBytes(), "text".getBytes()).toString();
-			else {
-				Document doc = Jsoup.connect(url).get();
-				Elements ps = doc.getElementsByTag("p");
-				for (Element p : ps)
-					text += p.text() + "\n";
-				if (text.length() > 0) {
-					Put puts = new Put(url.getBytes());
-					puts.add("m".getBytes(), "text".getBytes(), text.getBytes());
-					puts.add("m".getBytes(), "title".getBytes(), doc.title().getBytes());
-					_t_url_text.put(puts);
-				}
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return text;
 	}
 	
 	@Override
