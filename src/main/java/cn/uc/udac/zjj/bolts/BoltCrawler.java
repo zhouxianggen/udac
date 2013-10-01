@@ -74,12 +74,18 @@ public class BoltCrawler extends BaseRichBolt {
 		row.addColumn("m".getBytes(), "Data".getBytes());
 		Result r = _t_pages.get(row);
 		if (!r.isEmpty()) {
-			String page = r.getValue("m".getBytes(), "Data".getBytes()).toString();
-			Document doc = Jsoup.parse(page);
-			Elements ps = doc.getElementsByTag("p");
-			title = doc.title();
-			for (Element p : ps)
-				text += p.text() + "\n";
+			byte[] bs = r.getValue("m".getBytes(), "Data".getBytes());
+			String page = new String(bs, "UTF-8");
+			String sgbk = new String(bs, "GBK");
+			if (sgbk.length() < page.length())
+				page = sgbk;
+			if (page.length() < bs.length) {
+				Document doc = Jsoup.parse(page);
+				Elements ps = doc.getElementsByTag("p");
+				title = doc.title();
+				for (Element p : ps)
+					text += p.text() + "\n";
+			}
 		}
 		String[] a = new String[2];
 		a[0] = title;
