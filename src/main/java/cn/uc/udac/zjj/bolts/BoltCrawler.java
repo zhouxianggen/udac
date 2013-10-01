@@ -87,6 +87,7 @@ public class BoltCrawler extends BaseRichBolt {
 					text += p.text() + "\n";
 			}
 		}
+		LOG.info(String.format("BoltCrawler.urlOpen: url=%s, title=%s, text=%s", url, title, text));
 		String[] a = new String[2];
 		a[0] = title;
 		a[1] = text;
