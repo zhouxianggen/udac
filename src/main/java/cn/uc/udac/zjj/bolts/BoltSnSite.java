@@ -15,6 +15,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import redis.clients.jedis.Jedis;
 import backtype.storm.task.TopologyContext;
@@ -31,13 +33,19 @@ public class BoltSnSite extends BaseBasicBolt {
 
 	@Override
 	public void prepare(Map conf, TopologyContext context) {
-		List<String> hosts = (List<String>)conf.get("sn_site_redis_hosts");
-		int port = ( (Long)conf.get("redis.port") ).intValue();
-		
-		_arrRedisServer = new Jedis[hosts.size()];
-		
-		for (int i = 0; i < hosts.size(); ++i) {
-			_arrRedisServer[i] = new Jedis(hosts.get(i), port);
+		try {
+			List<String> hosts = (List<String>)conf.get("sn_site_redis_hosts");
+			int port = ( (Long)conf.get("redis.port") ).intValue();
+			LOG.info(String.format("BoltSnsite.prepare, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
+					port));
+			
+			_arrRedisServer = new Jedis[hosts.size()];
+			
+			for (int i = 0; i < hosts.size(); ++i) {
+				_arrRedisServer[i] = new Jedis(hosts.get(i), port);
+			}
+		} catch (Exception e) {
+			LOG.info("BoltSnSite.prepare.exception:", e);
 		}
     }
     
@@ -66,8 +74,7 @@ public class BoltSnSite extends BaseBasicBolt {
 	    	
 	    	_arrRedisServer[h].zadd(key, 1, site);
 	    	_arrRedisServer[h].expire(key, seconds);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			LOG.info("BoltSnSite.execute.exception:", e);
 		}
 	}
