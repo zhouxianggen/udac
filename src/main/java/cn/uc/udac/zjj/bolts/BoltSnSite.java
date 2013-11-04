@@ -73,11 +73,11 @@ public class BoltSnSite extends BaseBasicBolt {
 	    	int h = hash(key);
 	    	int seconds = 30 * 24 * 3600;
 	    	if (++_count % 10000 == 0) {
-	    		LOG.info(String.format("BoltSnSite: time=%s sn=%s, url=%s", time, sn, url));
-	    		LOG.info(String.format("BoltSnSite: key=%s h=%d", key, h));
+	    		LOG.info(String.format("BoltSnSite %d: time=%s sn=%s, url=%s", _count, time, sn, url));
+	    		LOG.info(String.format("BoltSnSite %d: key=%s h=%d", _count, key, h));
 	    	}
 	    	
-	    	_arrRedisServer[h].zadd(key, 1, site);
+	    	_arrRedisServer[h].zincrby(key, 1, site);
 	    	_arrRedisServer[h].expire(key, seconds);
 		} catch (Exception e) {
 			LOG.info("BoltSnSite.execute.exception:", e);
