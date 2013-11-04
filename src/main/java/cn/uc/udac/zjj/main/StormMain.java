@@ -1,8 +1,16 @@
+/*
+ * BoltSnSite 
+ * 
+ * 1.0 记录sn访问的site分布
+ *
+ * zhouxg@ucweb.com 
+ */
+
+
 package cn.uc.udac.zjj.main;
 
 
 import java.util.Map;
-
 import backtype.storm.Config;
 import backtype.storm.StormSubmitter;
 import backtype.storm.generated.AlreadyAliveException;
@@ -17,21 +25,18 @@ public class StormMain {
 
 	static public void main(String[] args) {
 		TopologyBuilder builder = new TopologyBuilder();
-
-		builder.setSpout("s_log", new SpoutLog(), 32);
-		builder.setBolt("b_sn_date_site_pv", new BoltSnDateSitePv(), 4).shuffleGrouping("s_log");
-		builder.setBolt("b_date_site_pv", new BoltDateSitePv(), 4).shuffleGrouping("s_log");
-		builder.setBolt("b_date_url_pv", new BoltDateUrlPv(), 16).shuffleGrouping("s_log");
-		builder.setBolt("b_crawler", new BoltCrawler(), 64).shuffleGrouping("b_date_url_pv");
-		builder.setBolt("b_parser", new BoltParser(), 4).shuffleGrouping("b_crawler");
-		
 		Config conf = new Config();
+
+		builder.setSpout("s_log", new SpoutLog(), 1);
+		builder.setBolt("b_sn_site", new BoltSnSite(), 1).shuffleGrouping("s_log");
+		builder.setBolt("b_site_url", new BoltSiteUrl(), 1).shuffleGrouping("s_log");
+		
 		conf.setNumWorkers(20);
-		Map myconf = Utils.findAndReadConfigFile("zjj.yaml");
+		Map myconf = Utils.findAndReadConfigFile("udac.yaml");
 		conf.putAll(myconf);
 
 		try {
-			StormSubmitter.submitTopology("zjj", conf, builder.createTopology());
+			StormSubmitter.submitTopology("udac", conf, builder.createTopology());
 		} catch (AlreadyAliveException e) {
 			e.printStackTrace();
 		} catch (InvalidTopologyException e) {

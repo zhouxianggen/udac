@@ -1,0 +1,20 @@
+
+
+ucmq_hosts:
+    - "pagediff1"
+    - "pagediff2"
+    - "pagediff3"
+    - "pagediff4"
+    - "pagediff5"
+
+ucmq_port: 8803
+ucmq_name: "zjj_log"
+
+
+sn_site_redis_hosts:
+    - "pagediff5"
+    
+site_url_redis_hosts:
+    - "pagediff5"
+    
+redis_port : 6379
