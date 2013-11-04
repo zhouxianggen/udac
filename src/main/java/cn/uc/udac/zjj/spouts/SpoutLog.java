@@ -17,6 +17,8 @@ import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import cn.uc.udac.mqs.UCMessageQueue;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.util.List;
@@ -27,7 +29,7 @@ public class SpoutLog extends BaseRichSpout {
 	
 	static public Logger LOG = Logger.getLogger(SpoutLog.class);
 	private SpoutOutputCollector _collector;
-	private UCMessageQueue[] _mqs;
+	private UCMessageQueue[] _arrMq;
 
 	@Override
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
@@ -36,17 +38,18 @@ public class SpoutLog extends BaseRichSpout {
 		int port = ( (Long)conf.get("ucmq_port") ).intValue();
 		String qname = (String)conf.get("ucmq_name");
 		
-		_mqs = new UCMessageQueue[hosts.size()];
+		_arrMq = new UCMessageQueue[hosts.size()];
 		
 		for (int i=0; i<hosts.size(); i+=1)
-			_mqs[i] = new UCMessageQueue(hosts.get(i), port, qname);
+			_arrMq[i] = new UCMessageQueue(hosts.get(i), port, qname);
 	}
 
 	@Override
 	public void nextTuple() {
-		for (int i=0; i<_mqs.length; i+=1) {
+		for (int i=0; i<_arrMq.length; i+=1) {
 			try {
-				String[] parts = _mqs[i].get().split("`");
+				String[] parts = _arrMq[i].get().split("`");
+				LOG.info(String.format("SpoutLog.next, tuples=%s", StringUtils.join(parts, ",")));
 				if (parts.length != 5)
 					continue;
 				_collector.emit(new Values(parts));
