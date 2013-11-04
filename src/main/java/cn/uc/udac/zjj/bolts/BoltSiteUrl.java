@@ -71,7 +71,7 @@ public class BoltSiteUrl extends BaseBasicBolt {
 	    	String key = site + "`" + hour;
 	    	int h = hash(key);
 	    	int seconds = 24 * 3600;
-	    	LOG.info(String.format("BoltSiteUrl: time=%s url=%d", time, url));
+	    	LOG.info(String.format("BoltSiteUrl: time=%s url=%s", time, url));
 	    	LOG.info(String.format("BoltSiteUrl: key=%s h=%d", key, h));
 	    	
 	    	_arrRedisServer[h].zadd(key, 1, url);
