@@ -35,7 +35,7 @@ public class BoltSnSite extends BaseBasicBolt {
 	public void prepare(Map conf, TopologyContext context) {
 		try {
 			List<String> hosts = (List<String>)conf.get("sn_site_redis_hosts");
-			int port = ( (Long)conf.get("redis.port") ).intValue();
+			int port = ( (Long)conf.get("redis_port") ).intValue();
 			LOG.info(String.format("BoltSnsite.prepare, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
 					port));
 			

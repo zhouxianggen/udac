@@ -35,7 +35,7 @@ public class BoltSiteUrl extends BaseBasicBolt {
 	public void prepare(Map conf, TopologyContext context) {
 		try {
 			List<String> hosts = (List<String>)conf.get("site_url_redis_hosts");
-			int port = ( (Long)conf.get("redis.port") ).intValue();
+			int port = ( (Long)conf.get("redis_port") ).intValue();
 			LOG.info(String.format("BoltSiteUrl.prepare, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
 					port));
 			
