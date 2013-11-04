@@ -27,11 +27,11 @@ public class StormMain {
 		TopologyBuilder builder = new TopologyBuilder();
 		Config conf = new Config();
 
-		builder.setSpout("s_log", new SpoutLog(), 1);
-		builder.setBolt("b_sn_site", new BoltSnSite(), 1).shuffleGrouping("s_log");
-		builder.setBolt("b_site_url", new BoltSiteUrl(), 1).shuffleGrouping("s_log");
+		builder.setSpout("s_log", new SpoutLog(), 16);
+		builder.setBolt("b_sn_site", new BoltSnSite(), 4).shuffleGrouping("s_log");
+		builder.setBolt("b_site_url", new BoltSiteUrl(), 4).shuffleGrouping("s_log");
 		
-		conf.setNumWorkers(20);
+		conf.setNumWorkers(24);
 		Map myconf = Utils.findAndReadConfigFile("udac.yaml");
 		conf.putAll(myconf);
 

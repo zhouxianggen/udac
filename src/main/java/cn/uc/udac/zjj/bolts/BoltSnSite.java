@@ -30,6 +30,7 @@ public class BoltSnSite extends BaseBasicBolt {
 	
 	static public Logger LOG = Logger.getLogger(BoltSnSite.class);
 	private Jedis[] _arrRedisServer;
+	private int _count = 0;
 
 	@Override
 	public void prepare(Map conf, TopologyContext context) {
@@ -71,8 +72,10 @@ public class BoltSnSite extends BaseBasicBolt {
 	    	String key = sn + "`" + date;
 	    	int h = hash(key);
 	    	int seconds = 30 * 24 * 3600;
-	    	LOG.info(String.format("BoltSnSite: time=%s sn=%s, url=%s", time, sn, url));
-	    	LOG.info(String.format("BoltSnSite: key=%s h=%d", key, h));
+	    	if (++_count % 10000 == 0) {
+	    		LOG.info(String.format("BoltSnSite: time=%s sn=%s, url=%s", time, sn, url));
+	    		LOG.info(String.format("BoltSnSite: key=%s h=%d", key, h));
+	    	}
 	    	
 	    	_arrRedisServer[h].zadd(key, 1, site);
 	    	_arrRedisServer[h].expire(key, seconds);

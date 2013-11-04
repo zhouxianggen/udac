@@ -30,6 +30,7 @@ public class SpoutLog extends BaseRichSpout {
 	static public Logger LOG = Logger.getLogger(SpoutLog.class);
 	private SpoutOutputCollector _collector;
 	private UCMessageQueue[] _arrMq;
+	private int _count = 0;
 
 	@Override
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
@@ -49,7 +50,8 @@ public class SpoutLog extends BaseRichSpout {
 		for (int i=0; i<_arrMq.length; i+=1) {
 			try {
 				String[] parts = _arrMq[i].get().split("`");
-				LOG.info(String.format("SpoutLog.next, tuples=%s", StringUtils.join(parts, ",")));
+				if (++_count % 10000 == 0)
+					LOG.info(String.format("SpoutLog.next, tuples=%s", StringUtils.join(parts, ",")));
 				if (parts.length != 5)
 					continue;
 				_collector.emit(new Values(parts));
