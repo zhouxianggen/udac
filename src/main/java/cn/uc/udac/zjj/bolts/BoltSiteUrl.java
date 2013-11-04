@@ -62,14 +62,17 @@ public class BoltSiteUrl extends BaseBasicBolt {
     @Override
 	public void execute(Tuple input, BasicOutputCollector collector) {
     	try {
-	    	Date tmp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(input.getString(0));
-	    	String hour = new SimpleDateFormat("yyyy-MM-dd-HH").format(tmp);
+    		String time = input.getString(0);
 	    	String url = input.getString(4);
+	    	Date tmp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
+	    	tmp.setMinutes(tmp.getMinutes()/15);
+	    	String hour = new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(tmp);
 	    	String site = new URL(url).getHost();
 	    	String key = site + "`" + hour;
 	    	int h = hash(key);
 	    	int seconds = 24 * 3600;
-	    	LOG.info(String.format("SiteUrl: site=%s url=%s h=%d", site, url, h));
+	    	LOG.info(String.format("BoltSiteUrl: time=%s url=%d", time, url));
+	    	LOG.info(String.format("BoltSiteUrl: key=%s h=%d", key, h));
 	    	
 	    	_arrRedisServer[h].zadd(key, 1, url);
 	    	_arrRedisServer[h].expire(key, seconds);
