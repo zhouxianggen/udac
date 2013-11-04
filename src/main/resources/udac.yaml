@@ -8,7 +8,7 @@ ucmq_hosts:
     - "pagediff5"
 
 ucmq_port: 8803
-ucmq_name: "zjj_log"
+ucmq_name: "zjj"
 
 
 sn_site_redis_hosts:

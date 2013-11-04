@@ -32,9 +32,9 @@ public class SpoutLog extends BaseRichSpout {
 	@Override
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
 		_collector = collector;
-		List<String> hosts = (List<String>)conf.get("SpoutLog.ucmq.hosts");
-		int port = ( (Long)conf.get("SpoutLog.ucmq.port") ).intValue();
-		String qname = (String)conf.get("SpoutLog.ucmq.qname");
+		List<String> hosts = (List<String>)conf.get("ucmq_hosts");
+		int port = ( (Long)conf.get("ucmq_port") ).intValue();
+		String qname = (String)conf.get("ucmq_name");
 		
 		_mqs = new UCMessageQueue[hosts.size()];
 		
