@@ -70,8 +70,7 @@ public class SpoutLog extends BaseRichSpout {
 				}	
 			}
 			catch (IOException e) {
-				LOG.info(String.format("SpoutLog.next, msg=%s", msg));
-				LOG.info("SpoutLog.nextTuple.exception: ", e);
+				//LOG.info("SpoutLog.nextTuple.exception: ", e);
 			}
 		}
 	}
