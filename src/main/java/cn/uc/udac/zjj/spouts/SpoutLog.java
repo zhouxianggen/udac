@@ -17,10 +17,11 @@ import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import cn.uc.udac.mqs.UCMessageQueue;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import java.io.IOException;
+import java.net.URL;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +31,7 @@ public class SpoutLog extends BaseRichSpout {
 	static public Logger LOG = Logger.getLogger(SpoutLog.class);
 	private SpoutOutputCollector _collector;
 	private UCMessageQueue[] _arrMq;
+	HashSet<String> _newsSites;
 	private int _count = 0;
 
 	@Override
@@ -38,6 +40,8 @@ public class SpoutLog extends BaseRichSpout {
 		List<String> hosts = (List<String>)conf.get("ucmq_hosts");
 		int port = ( (Long)conf.get("ucmq_port") ).intValue();
 		String qname = (String)conf.get("ucmq_name");
+		List<String> sites = (List<String>)conf.get("news_sites");
+		_newsSites = new HashSet<String>(sites);
 		
 		_arrMq = new UCMessageQueue[hosts.size()];
 		
@@ -49,12 +53,20 @@ public class SpoutLog extends BaseRichSpout {
 	public void nextTuple() {
 		for (int i=0; i<_arrMq.length; i+=1) {
 			try {
-				String[] parts = _arrMq[i].get().split("`");
+				String msg = _arrMq[i].get();
+				String[] parts = msg.split("`");
+				
 				if (++_count % 10000 == 0)
-					LOG.info(String.format("SpoutLog.next, tuples=%s", StringUtils.join(parts, ",")));
-				if (parts.length != 5)
-					continue;
-				_collector.emit(new Values(parts));
+					LOG.info(String.format("SpoutLog.next, msg=%s", msg));
+				
+				if (parts.length == 5) {
+					String url = parts[4];
+					String site = new URL(url).getHost();
+					
+					if (_newsSites.contains(site)) {
+						_collector.emit(new Values(parts));
+					}
+				}	
 			}
 			catch (IOException e) {
 				LOG.info("SpoutLog.nextTuple.exception:", e);
