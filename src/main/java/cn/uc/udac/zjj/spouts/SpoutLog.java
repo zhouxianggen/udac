@@ -52,8 +52,9 @@ public class SpoutLog extends BaseRichSpout {
 	@Override
 	public void nextTuple() {
 		for (int i=0; i<_arrMq.length; i+=1) {
+			String msg = "";
 			try {
-				String msg = _arrMq[i].get();
+				msg = _arrMq[i].get();
 				String[] parts = msg.split("`");
 				
 				if (++_count % 10000 == 0)
@@ -69,7 +70,8 @@ public class SpoutLog extends BaseRichSpout {
 				}	
 			}
 			catch (IOException e) {
-				LOG.info("SpoutLog.nextTuple.exception:", e);
+				LOG.info(String.format("SpoutLog.next, msg=%s", msg));
+				LOG.info("SpoutLog.nextTuple.exception: ", e);
 			}
 		}
 	}
