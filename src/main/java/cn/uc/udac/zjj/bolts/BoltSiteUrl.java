@@ -64,14 +64,15 @@ public class BoltSiteUrl extends BaseBasicBolt {
 	public void execute(Tuple input, BasicOutputCollector collector) {
     	try {
     		String time = input.getString(0);
-	    	String url = input.getString(4);
+	    	String url = input.getString(3);
 	    	Date tmp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
-	    	tmp.setMinutes(tmp.getMinutes()/15);
-	    	String hour = new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(tmp);
+	    	tmp.setMinutes(tmp.getMinutes()/30);
+	    	String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(tmp);
 	    	String site = new URL(url).getHost();
-	    	String key = site + "`" + hour;
+	    	String key = site + "`" + timeStamp;
 	    	int h = hash(key);
-	    	int seconds = 24 * 3600;
+	    	int seconds = 2 * 3600;
+	    	
 	    	if (++_count % 10000 == 0) {
 	    		LOG.info(String.format("BoltSiteUrl %d: time=%s url=%s", _count, time, url));
 	    		LOG.info(String.format("BoltSiteUrl %d: key=%s h=%d", _count, key, h));

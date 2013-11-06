@@ -61,12 +61,12 @@ public class SpoutLog extends BaseRichSpout {
 					LOG.info(String.format("SpoutLog.next, msg=%s", msg));
 				
 				if (parts.length == 5) {
-					String url = parts[4];
-					String site = new URL(url).getHost();
+					//String url = parts[4];
+					//String site = new URL(url).getHost();
 					
-					if (_newsSites.contains(site)) {
-						_collector.emit(new Values(parts));
-					}
+					//if (_newsSites.contains(site)) {
+					_collector.emit(new Values(parts));
+					//}
 				}	
 			}
 			catch (IOException e) {
@@ -85,7 +85,7 @@ public class SpoutLog extends BaseRichSpout {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("t", "sn", "ip", "imei", "url"));
+		declarer.declare(new Fields("time", "sn", "imei", "url", "refer"));
 	}
 
 }

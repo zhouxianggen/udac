@@ -1,7 +1,7 @@
 /*
- * BoltSnSite 
+ * BoltUrlUrl
  * 
- * 1.0 记录sn访问的site分布
+ * 1.0 记录url间的跳转概率
  *
  * zhouxg@ucweb.com 
  */
@@ -15,7 +15,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import redis.clients.jedis.Jedis;
@@ -26,18 +25,18 @@ import backtype.storm.topology.base.BaseBasicBolt;
 import backtype.storm.tuple.Tuple;
 
 
-public class BoltSnSite extends BaseBasicBolt {
+public class BoltUrlUrl extends BaseBasicBolt {
 	
-	static public Logger LOG = Logger.getLogger(BoltSnSite.class);
+	static public Logger LOG = Logger.getLogger(BoltSiteUrl.class);
 	private Jedis[] _arrRedisServer;
 	private int _count = 0;
 
 	@Override
 	public void prepare(Map conf, TopologyContext context) {
 		try {
-			List<String> hosts = (List<String>)conf.get("sn_site_redis_hosts");
+			List<String> hosts = (List<String>)conf.get("url_url_redis_hosts");
 			int port = ( (Long)conf.get("redis_port") ).intValue();
-			LOG.info(String.format("BoltSnsite.prepare, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
+			LOG.info(String.format("BoltUrlUrl.prepare, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
 					port));
 			
 			_arrRedisServer = new Jedis[hosts.size()];
@@ -46,7 +45,7 @@ public class BoltSnSite extends BaseBasicBolt {
 				_arrRedisServer[i] = new Jedis(hosts.get(i), port);
 			}
 		} catch (Exception e) {
-			LOG.info("BoltSnSite.prepare.exception:", e);
+			LOG.info("BoltUrlUrl.prepare.exception:", e);
 		}
     }
     
@@ -64,27 +63,28 @@ public class BoltSnSite extends BaseBasicBolt {
 	public void execute(Tuple input, BasicOutputCollector collector) {
     	try {
     		String time = input.getString(0);
-	    	String sn = input.getString(1);
-	    	String imei = input.getString(2);
 	    	String url = input.getString(3);
+	    	String refer = input.getString(4);
 	    	Date tmp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
-	    	//tmp.setMinutes(tmp.getDay()/7);
-	    	String timeStamp = new SimpleDateFormat("yyyy-MM").format(tmp);
-	    	String site = new URL(url).getHost();
-	    	//String key = sn + "`" + imei + "`" + timeStamp;
-	    	String key = sn + "`" + timeStamp;
+	    	tmp.setMinutes(tmp.getMinutes()/30);
+	    	String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(tmp);
+	    	String siteFrom = new URL(refer).getHost();
+	    	String siteTo = new URL(url).getHost();
+	    	String key = refer + "`" + timeStamp;
 	    	int h = hash(key);
-	    	int seconds = 120 * 24 * 3600;
+	    	int seconds = 2 * 3600;
 	    	
 	    	if (++_count % 10000 == 0) {
-	    		LOG.info(String.format("BoltSnSite %d: time=%s sn=%s, url=%s", _count, time, sn, url));
-	    		LOG.info(String.format("BoltSnSite %d: key=%s h=%d", _count, key, h));
+	    		LOG.info(String.format("BoltUrlUrl %d: time=%s url=%s", _count, time, url));
+	    		LOG.info(String.format("BoltUrlUrl %d: key=%s h=%d", _count, key, h));
 	    	}
 	    	
-	    	_arrRedisServer[h].zincrby(key, 1, site);
-	    	_arrRedisServer[h].expire(key, seconds);
+	    	if (siteFrom != siteTo) {
+	    		_arrRedisServer[h].zincrby(key, 1, url);
+	    		_arrRedisServer[h].expire(key, seconds);
+	    	}
 		} catch (Exception e) {
-			LOG.info("BoltSnSite.execute.exception:", e);
+			LOG.info("BoltUrlUrl.execute.exception:", e);
 		}
 	}
 
