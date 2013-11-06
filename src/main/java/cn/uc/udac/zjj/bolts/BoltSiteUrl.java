@@ -72,10 +72,15 @@ public class BoltSiteUrl extends BaseBasicBolt {
 	    	String key = site + "`" + timeStamp;
 	    	int h = hash(key);
 	    	int seconds = 2 * 3600;
+	    	int card = _arrRedisServer[h].zcard(key).intValue();
 	    	
 	    	if (++_count % 10000 == 0) {
 	    		LOG.info(String.format("BoltSiteUrl %d: time=%s url=%s", _count, time, url));
 	    		LOG.info(String.format("BoltSiteUrl %d: key=%s h=%d", _count, key, h));
+	    	}
+	    	
+	    	if (card > 1000) {
+	    		_arrRedisServer[h].zremrangeByRank(key, 0, card-50);
 	    	}
 	    	
 	    	_arrRedisServer[h].zincrby(key, 1, url);
