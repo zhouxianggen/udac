@@ -42,7 +42,7 @@ public class BoltSiteUrl extends BaseBasicBolt {
 			LOG.info(String.format("BoltSiteUrl.prepare, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
 					port));
 			
-			List<String> sites = (List<String>)conf.get("news_sites");
+			//List<String> sites = (List<String>)conf.get("news_sites");
 			//_newsSites = new HashSet<String>(sites);
 			//_arrRedisServer = new Jedis[hosts.size()];
 			
@@ -92,7 +92,7 @@ public class BoltSiteUrl extends BaseBasicBolt {
 	    		_arrRedisServer[h].expire(key, 2 * 3600);
 	    	}
 		} catch (Exception e) {
-			LOG.info("BoltSiteUrl.execute.exception:", e);
+			//LOG.info("BoltSiteUrl.execute.exception:", e);
 		}
 	}
 
