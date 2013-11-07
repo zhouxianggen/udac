@@ -30,14 +30,15 @@ public class BoltSiteSite extends BaseBasicBolt {
 	
 	static public Logger LOG = Logger.getLogger(BoltSiteSite.class);
 	private Jedis[] _arrRedisServer;
+	private Map _conf;
 	private int _count = 0;
 
-	@Override
-	public void prepare(Map conf, TopologyContext context) {
+	private void init(Map conf) {
 		try {
 			List<String> hosts = (List<String>)conf.get("site_site_redis_hosts");
 			int port = ( (Long)conf.get("redis_port") ).intValue();
-			LOG.info(String.format("BoltSiteSite.prepare, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
+			
+			LOG.info(String.format("BoltSiteSite.init, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
 					port));
 			
 			_arrRedisServer = new Jedis[hosts.size()];
@@ -46,8 +47,14 @@ public class BoltSiteSite extends BaseBasicBolt {
 				_arrRedisServer[i] = new Jedis(hosts.get(i), port);
 			}
 		} catch (Exception e) {
-			LOG.info("BoltSiteSite.prepare.exception:", e);
+			LOG.info("BoltSiteSite.init.exception:", e);
 		}
+	}
+	
+	@Override
+	public void prepare(Map conf, TopologyContext context) {
+		_conf = conf;
+		init(_conf);
     }
     
 	private int hash(String key) {
@@ -85,7 +92,7 @@ public class BoltSiteSite extends BaseBasicBolt {
 	    		_arrRedisServer[h].expire(key, seconds);
 	    	}
 		} catch (Exception e) {
-			LOG.info("BoltSiteSite.execute.exception:", e);
+			init(_conf);
 		}
 	}
 

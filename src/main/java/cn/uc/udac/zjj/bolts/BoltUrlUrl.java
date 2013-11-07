@@ -29,14 +29,15 @@ public class BoltUrlUrl extends BaseBasicBolt {
 	
 	static public Logger LOG = Logger.getLogger(BoltSiteUrl.class);
 	private Jedis[] _arrRedisServer;
+	private Map _conf;
 	private int _count = 0;
 
-	@Override
-	public void prepare(Map conf, TopologyContext context) {
+	private void init(Map conf) {
 		try {
 			List<String> hosts = (List<String>)conf.get("url_url_redis_hosts");
 			int port = ( (Long)conf.get("redis_port") ).intValue();
-			LOG.info(String.format("BoltUrlUrl.prepare, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
+			
+			LOG.info(String.format("BoltUrlUrl.init, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
 					port));
 			
 			_arrRedisServer = new Jedis[hosts.size()];
@@ -45,8 +46,14 @@ public class BoltUrlUrl extends BaseBasicBolt {
 				_arrRedisServer[i] = new Jedis(hosts.get(i), port);
 			}
 		} catch (Exception e) {
-			LOG.info("BoltUrlUrl.prepare.exception:", e);
+			LOG.info("BoltUrlUrl.init.exception:", e);
 		}
+	}
+	
+	@Override
+	public void prepare(Map conf, TopologyContext context) {
+		_conf = conf;
+		init(_conf);
     }
     
 	private int hash(String key) {
@@ -91,7 +98,7 @@ public class BoltUrlUrl extends BaseBasicBolt {
 		    	}
 	    	}
 		} catch (Exception e) {
-			LOG.info("BoltUrlUrl.execute.exception:", e);
+			init(_conf);
 		}
 	}
 
