@@ -59,7 +59,7 @@ public class SpoutLog extends BaseRichSpout {
 				
 				if (parts.length == 5) {
 					_collector.emit(new Values(parts));
-				}	
+				}
 			}
 			catch (IOException e) {
 				//LOG.info("SpoutLog.nextTuple.exception: ", e);

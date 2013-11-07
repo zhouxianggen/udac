@@ -31,7 +31,6 @@ public class BoltSiteUrl extends BaseBasicBolt {
 	
 	static public Logger LOG = Logger.getLogger(BoltSiteUrl.class);
 	private Jedis[] _arrRedisServer;
-	//HashSet<String> _newsSites;
 	private int _count = 0;
 
 	@Override
@@ -44,7 +43,7 @@ public class BoltSiteUrl extends BaseBasicBolt {
 			
 			//List<String> sites = (List<String>)conf.get("news_sites");
 			//_newsSites = new HashSet<String>(sites);
-			//_arrRedisServer = new Jedis[hosts.size()];
+			_arrRedisServer = new Jedis[hosts.size()];
 			
 			for (int i = 0; i < hosts.size(); ++i) {
 				_arrRedisServer[i] = new Jedis(hosts.get(i), port);
