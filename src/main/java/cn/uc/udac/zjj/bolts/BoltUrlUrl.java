@@ -65,23 +65,30 @@ public class BoltUrlUrl extends BaseBasicBolt {
     		String time = input.getString(0);
 	    	String url = input.getString(3);
 	    	String refer = input.getString(4);
-	    	Date tmp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
-	    	tmp.setMinutes(tmp.getMinutes()/30);
-	    	String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(tmp);
-	    	String siteFrom = new URL(refer).getHost();
-	    	String siteTo = new URL(url).getHost();
-	    	String key = refer + "`" + timeStamp;
+	    	String key = refer + '`' + url;
 	    	int h = hash(key);
-	    	int seconds = 2 * 3600;
+	    	int pv = _arrRedisServer[h].incr(key).intValue();
+	    	
+	    	_arrRedisServer[h].expire(key, 30);
 	    	
 	    	if (++_count % 10000 == 0) {
-	    		LOG.info(String.format("BoltUrlUrl %d: time=%s url=%s", _count, time, url));
-	    		LOG.info(String.format("BoltUrlUrl %d: key=%s h=%d", _count, key, h));
+	    		LOG.info(String.format("BoltUrlUrl %d: time=%s url=%s refer=%s", _count, time, url, refer));
 	    	}
 	    	
-	    	if (siteFrom != siteTo) {
-	    		_arrRedisServer[h].zincrby(key, 1, url);
-	    		_arrRedisServer[h].expire(key, seconds);
+	    	if (pv > 500) {
+	    		Date tmp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
+		    	tmp.setMinutes(tmp.getMinutes()/30);
+		    	String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(tmp);
+		    	String siteFrom = new URL(refer).getHost();
+		    	String siteTo = new URL(url).getHost();
+		    	
+		    	key = refer + "`" + timeStamp;
+		    	h = hash(key);
+		    	
+		    	if (siteFrom == siteTo) {
+		    		_arrRedisServer[h].zadd(key, pv, url);
+		    		_arrRedisServer[h].expire(key, 2 * 3600);
+		    	}
 	    	}
 		} catch (Exception e) {
 			LOG.info("BoltUrlUrl.execute.exception:", e);

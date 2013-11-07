@@ -31,7 +31,6 @@ public class SpoutLog extends BaseRichSpout {
 	static public Logger LOG = Logger.getLogger(SpoutLog.class);
 	private SpoutOutputCollector _collector;
 	private UCMessageQueue[] _arrMq;
-	HashSet<String> _newsSites;
 	private int _count = 0;
 
 	@Override
@@ -40,8 +39,6 @@ public class SpoutLog extends BaseRichSpout {
 		List<String> hosts = (List<String>)conf.get("ucmq_hosts");
 		int port = ( (Long)conf.get("ucmq_port") ).intValue();
 		String qname = (String)conf.get("ucmq_name");
-		List<String> sites = (List<String>)conf.get("news_sites");
-		_newsSites = new HashSet<String>(sites);
 		
 		_arrMq = new UCMessageQueue[hosts.size()];
 		
@@ -61,12 +58,7 @@ public class SpoutLog extends BaseRichSpout {
 					LOG.info(String.format("SpoutLog.next, msg=%s", msg));
 				
 				if (parts.length == 5) {
-					//String url = parts[4];
-					//String site = new URL(url).getHost();
-					
-					//if (_newsSites.contains(site)) {
 					_collector.emit(new Values(parts));
-					//}
 				}	
 			}
 			catch (IOException e) {
