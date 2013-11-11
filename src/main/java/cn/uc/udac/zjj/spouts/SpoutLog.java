@@ -54,10 +54,10 @@ public class SpoutLog extends BaseRichSpout {
 				msg = _arrMq[i].get();
 				String[] parts = msg.split("`");
 				
-				if (++_count % 10000 == 0)
+				if (++_count % 1 == 0)
 					LOG.info(String.format("SpoutLog.next, msg=%s", msg));
 				
-				if (parts.length == 5) {
+				if (parts.length == 6) {
 					_collector.emit(new Values(parts));
 				}
 			}
@@ -77,7 +77,7 @@ public class SpoutLog extends BaseRichSpout {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("time", "sn", "imei", "url", "refer"));
+		declarer.declare(new Fields("time", "imei", "imsi", "sn", "cp", "url"));
 	}
 
 }

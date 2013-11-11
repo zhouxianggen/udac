@@ -6,15 +6,28 @@ ucmq_hosts:
     - "pagediff3"
     - "pagediff4"
     - "pagediff5"
-
-ucmq_port: 8803
-ucmq_name: "zjj"
+    
+ucmq_port: 50006
+ucmq_name: "zjj_req"
 
 
 sn_site_redis_hosts:
     - "pagediff4"
-    
+        
 site_url_redis_hosts:
     - "pagediff3"
+
+city_site_redis_hosts:
+    - "pagediff2"
     
+sn_last_url_redis_hosts:
+	- "pagediff2"
+	
+imsi_imei_redis_hosts:
+    - "pagediff4"
+    
+imei_imsi_redis_hosts:
+    - "pagediff4"
+            
 redis_port : 6379
+

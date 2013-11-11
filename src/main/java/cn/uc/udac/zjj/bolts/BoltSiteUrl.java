@@ -72,7 +72,7 @@ public class BoltSiteUrl extends BaseBasicBolt {
 	public void execute(Tuple input, BasicOutputCollector collector) {
     	try {
     		String time = input.getString(0);
-	    	String url = input.getString(3);
+	    	String url = input.getString(5);
 	    	String site = new URL(url).getHost();
 	    	String key = url;
 	    	int h = hash(key);
@@ -80,23 +80,23 @@ public class BoltSiteUrl extends BaseBasicBolt {
 	    	
 	    	_arrRedisServer[h].expire(key, 10);
 	    	
-	    	if (++_count % 10000 == 0) {
+	    	if (++_count % 1 == 0) {
 	    		LOG.info(String.format("BoltSiteUrl %d: time=%s url=%s", _count, time, url));
 	    	}
 	    	
-	    	if (pv > 1000) {
+	    	if (pv > 500) {
 	    		Date tmp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
-		    	tmp.setMinutes(tmp.getMinutes()/30);
+		    	tmp.setMinutes(tmp.getMinutes()/15);
 		    	String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(tmp);
 		    	
 		    	key = site + "`" + timeStamp;
 		    	h = hash(key);
 		    	
 		    	_arrRedisServer[h].zadd(key, pv, url);
-	    		_arrRedisServer[h].expire(key, 2 * 3600);
+	    		_arrRedisServer[h].expire(key, 1 * 3600);
 	    	}
 		} catch (Exception e) {
-			//LOG.info("BoltSiteUrl.execute.exception:", e);
+			LOG.info("BoltSiteUrl.execute.exception:", e);
 			init(_conf);
 		}
 	}
