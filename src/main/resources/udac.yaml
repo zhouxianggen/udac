@@ -21,7 +21,7 @@ city_site_redis_hosts:
     - "pagediff2"
     
 sn_last_url_redis_hosts:
-	- "pagediff2"
+    - "pagediff2"
 	
 imsi_imei_redis_hosts:
     - "pagediff4"
