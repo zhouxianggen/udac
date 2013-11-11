@@ -16,15 +16,21 @@ site_url_redis_hosts:
     - "pagediff3"
 
 city_site_redis_hosts:
-    - "pagediff2"
+    - "pagediff4"
 
 sn_last_url_redis_hosts:
     - "pagediff2"
 
+site_site_redis_hosts:
+    - "pagediff2"
+
+url_url_redis_hosts:
+    - "pagediff2"
+    
 imsi_imei_redis_hosts:
-    - "pagediff4"
+    - "pagediff5"
 
 imei_imsi_redis_hosts:
-    - "pagediff4"
+    - "pagediff5"
 
 redis_port : 6379
