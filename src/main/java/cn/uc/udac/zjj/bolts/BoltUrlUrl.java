@@ -78,7 +78,7 @@ public class BoltUrlUrl extends BaseBasicBolt {
 	    	
 	    	_arrRedisServer[h].expire(key, 60);
 	    	
-	    	if (++_count % 1000 == 0) {
+	    	if (++_count % 100 == 0) {
 	    		LOG.info(String.format("BoltUrlUrl %d: time=%s url=%s refer=%s", _count, time, url, refer));
 	    	}
 	    	
