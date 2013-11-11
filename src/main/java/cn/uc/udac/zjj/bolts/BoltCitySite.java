@@ -81,7 +81,7 @@ public class BoltCitySite extends BaseBasicBolt {
 	    	int h = hash(key);
 	    	int seconds = 4 * 24 * 3600;
 	    	
-	    	if (++_count % 1 == 0) {
+	    	if (++_count % 1000 == 0) {
 	    		LOG.info(String.format("BoltCitySite %d: time=%s city=%s, site=%s", _count, time, city, site));
 	    		LOG.info(String.format("BoltCitySite %d: key=%s h=%d", _count, key, h));
 	    	}

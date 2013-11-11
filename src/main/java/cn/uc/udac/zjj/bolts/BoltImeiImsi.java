@@ -79,7 +79,7 @@ public class BoltImeiImsi extends BaseBasicBolt {
 	    	int h = hash(key);
 	    	int seconds = 4 * 24 * 3600;
 	    	
-	    	if (++_count % 1 == 0) {
+	    	if (++_count % 1000 == 0) {
 	    		LOG.info(String.format("BoltImeiImsi %d: time=%s imsi=%s, imei=%s", _count, time, imei, imsi));
 	    		LOG.info(String.format("BoltImeiImsi %d: key=%s h=%d", _count, key, h));
 	    	}

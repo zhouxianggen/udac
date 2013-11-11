@@ -80,7 +80,7 @@ public class BoltSnSite extends BaseBasicBolt {
 	    	int h = hash(key);
 	    	int seconds = 120 * 24 * 3600;
 	    	
-	    	if (++_count % 1 == 0) {
+	    	if (++_count % 1000 == 0) {
 	    		LOG.info(String.format("BoltSnSite %d: time=%s sn=%s, url=%s", _count, time, sn, url));
 	    		LOG.info(String.format("BoltSnSite %d: key=%s h=%d", _count, key, h));
 	    	}

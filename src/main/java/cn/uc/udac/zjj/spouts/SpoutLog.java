@@ -54,7 +54,7 @@ public class SpoutLog extends BaseRichSpout {
 				msg = _arrMq[i].get();
 				String[] parts = msg.split("`");
 				
-				if (++_count % 1 == 0)
+				if (++_count % 1000 == 0)
 					LOG.info(String.format("SpoutLog.next, msg=%s", msg));
 				
 				if (parts.length == 6) {
