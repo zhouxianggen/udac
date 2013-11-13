@@ -88,7 +88,7 @@ public class BoltSnLastUrl extends BaseBasicBolt {
 	    		LOG.info(String.format("BoltSnLastUrl %d: key=%s h=%d", _count, key, h));
 	    	}
 	    	
-	    	if (refer != null && refer != url) {
+	    	if (refer != null && !refer.equals(url)) {
 	    		collector.emit(new Values(time, refer, url));
 	    	}
 	    	_arrRedisServer[h].set(key, url);

@@ -86,7 +86,7 @@ public class BoltSiteSite extends BaseBasicBolt {
 	    		LOG.info(String.format("BoltSiteSite %d: key=%s h=%d", _count, key, h));
 	    	}
 	    	
-	    	if (siteFrom != siteTo) {
+	    	if (!siteFrom.equals(siteTo)) {
 	    		_arrRedisServer[h].zincrby(key, 1, siteTo);
 	    		_arrRedisServer[h].expire(key, seconds);
 	    	}
