@@ -31,6 +31,7 @@ public class StormMain {
 		builder.setBolt("b_sn_site", new BoltSnSite(), 4).shuffleGrouping("s_log");
 		builder.setBolt("b_site_url", new BoltSiteUrl(), 4).shuffleGrouping("s_log");
 		builder.setBolt("b_city_site", new BoltCitySite(), 4).shuffleGrouping("s_log");
+		builder.setBolt("b_time_site", new BoltTimeSite(), 4).shuffleGrouping("s_log");
 		builder.setBolt("b_imsi_imei", new BoltImsiImei(), 4).shuffleGrouping("s_log");
 		builder.setBolt("b_imei_imsi", new BoltImeiImsi(), 4).shuffleGrouping("s_log");
 		builder.setBolt("b_sn_last_url", new BoltSnLastUrl(), 4).shuffleGrouping("s_log");
