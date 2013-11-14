@@ -32,13 +32,14 @@ public class StormMain {
 		builder.setBolt("b_site_url", new BoltSiteUrl(), 4).shuffleGrouping("s_log");
 		builder.setBolt("b_city_site", new BoltCitySite(), 4).shuffleGrouping("s_log");
 		builder.setBolt("b_time_site", new BoltTimeSite(), 4).shuffleGrouping("s_log");
+		builder.setBolt("b_time_sn", new BoltTimeSn(), 4).shuffleGrouping("s_log");
 		builder.setBolt("b_imsi_imei", new BoltImsiImei(), 4).shuffleGrouping("s_log");
 		builder.setBolt("b_imei_imsi", new BoltImeiImsi(), 4).shuffleGrouping("s_log");
 		builder.setBolt("b_sn_last_url", new BoltSnLastUrl(), 4).shuffleGrouping("s_log");
 		builder.setBolt("b_site_site", new BoltSiteSite(), 4).shuffleGrouping("b_sn_last_url");
 		builder.setBolt("b_url_url", new BoltUrlUrl(), 4).shuffleGrouping("b_sn_last_url");
 		
-		conf.setNumWorkers(52);
+		conf.setNumWorkers(56);
 		Map myconf = Utils.findAndReadConfigFile("udac.yaml");
 		conf.putAll(myconf);
 

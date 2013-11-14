@@ -77,7 +77,7 @@ public class BoltCitySite extends BaseBasicBolt {
 	    	Date tmp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
 	    	String timeStamp = new SimpleDateFormat("yyyy-MM-dd").format(tmp);
 	    	String site = new URL(url).getHost();
-	    	String key = city + "`" + timeStamp;
+	    	String key = "CitySite:" + city + "`" + timeStamp;
 	    	int h = hash(key);
 	    	int seconds = 4 * 24 * 3600;
 	    	

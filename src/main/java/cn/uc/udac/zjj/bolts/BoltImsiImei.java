@@ -75,7 +75,7 @@ public class BoltImsiImei extends BaseBasicBolt {
 	    	String imsi = input.getString(2);
 	    	Date tmp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
 	    	String timeStamp = new SimpleDateFormat("yyyy-MM-dd").format(tmp);
-	    	String key = imsi + "`" + timeStamp;
+	    	String key = "ImsiImei:" + imsi + "`" + timeStamp;
 	    	int h = hash(key);
 	    	int seconds = 4 * 24 * 3600;
 	    	

@@ -77,9 +77,9 @@ public class BoltSnLastUrl extends BaseBasicBolt {
     		String time = input.getString(0);
 	    	String sn = input.getString(3);
 	    	String url = input.getString(5);
-	    	String key = sn;
+	    	String key = "SnLastUrl:" + sn;
 	    	int h = hash(key);
-	    	int seconds = 30;
+	    	int seconds = 120;
 	    	String refer = _arrRedisServer[h].get(key);
 	    	
 	    	if (++_count % 100 == 0) {

@@ -21,6 +21,9 @@ city_site_redis_hosts:
 time_site_redis_hosts:
     - "pagediff4"
 
+time_sn_redis_hosts:
+    - "pagediff4"
+    
 sn_last_url_redis_hosts:
     - "pagediff2"
 

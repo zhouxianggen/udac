@@ -72,11 +72,11 @@ public class BoltUrlUrl extends BaseBasicBolt {
     		String time = input.getString(0);
 	    	String refer = input.getString(1);
 	    	String url = input.getString(2);
-	    	String key = refer + '`' + url;
+	    	String key = "UrlUrl:" + refer + "`" + url;
 	    	int h = hash(key);
 	    	int pv = _arrRedisServer[h].incr(key).intValue();
 	    	
-	    	_arrRedisServer[h].expire(key, 30);
+	    	_arrRedisServer[h].expire(key, 60);
 	    	
 	    	if (++_count % 100 == 0) {
 	    		LOG.info(String.format("BoltUrlUrl %d: time=%s url=%s refer=%s", _count, time, url, refer));
@@ -90,13 +90,13 @@ public class BoltUrlUrl extends BaseBasicBolt {
 		    	String siteFrom = new URL(refer).getHost();
 		    	String siteTo = new URL(url).getHost();
 		    	
-		    	key = refer + "`" + timeStamp;
+		    	key = "UrlUrl:" + refer + "`" + timeStamp;
 		    	h = hash(key);
 		    	
-		    	//if (siteFrom == siteTo) {
-		    	_arrRedisServer[h].zadd(key, pv, url);
-		    	_arrRedisServer[h].expire(key, 1 * 3600);
-		    	//}
+		    	if (siteFrom.equals(siteTo)) {
+		    		_arrRedisServer[h].zadd(key, pv, url);
+		    		_arrRedisServer[h].expire(key, 1 * 3600);
+		    	}
 	    	}
 		} catch (Exception e) {
 			LOG.info("BoltUrlUrl.execute.exception:", e);

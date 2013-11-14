@@ -1,7 +1,7 @@
 /*
- * BoltTimeSite
+ * BoltTimeSn
  * 
- * 1.0 记录每段时间上的site分布
+ * 1.0 记录每段时间上的sn分布
  *
  * zhouxg@ucweb.com 
  */
@@ -27,7 +27,7 @@ import backtype.storm.topology.base.BaseBasicBolt;
 import backtype.storm.tuple.Tuple;
 
 
-public class BoltTimeSite extends BaseBasicBolt {
+public class BoltTimeSn extends BaseBasicBolt {
 	
 	static public Logger LOG = Logger.getLogger(BoltCitySite.class);
 	private Jedis[] _arrRedisServer;
@@ -36,10 +36,10 @@ public class BoltTimeSite extends BaseBasicBolt {
 
 	private void init(Map conf) {
 		try {
-			List<String> hosts = (List<String>)conf.get("time_site_redis_hosts");
+			List<String> hosts = (List<String>)conf.get("time_sn_redis_hosts");
 			int port = ( (Long)conf.get("redis_port") ).intValue();
 			
-			LOG.info(String.format("BoltTimeSite.init, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
+			LOG.info(String.format("BoltTimeSn.init, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
 					port));
 			
 			_arrRedisServer = new Jedis[hosts.size()];
@@ -48,7 +48,7 @@ public class BoltTimeSite extends BaseBasicBolt {
 				_arrRedisServer[i] = new Jedis(hosts.get(i), port);
 			}
 		} catch (Exception e) {
-			LOG.info("BoltTimeSite.init.exception:", e);
+			LOG.info("BoltTimeSn.init.exception:", e);
 		}
 	}
 	
@@ -72,23 +72,22 @@ public class BoltTimeSite extends BaseBasicBolt {
 	public void execute(Tuple input, BasicOutputCollector collector) {
     	try {
     		String time = input.getString(0);
-	    	String url = input.getString(5);
+	    	String sn = input.getString(3);
 	    	Date tmp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
 	    	String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH").format(tmp);
-	    	String site = new URL(url).getHost();
-	    	String key = "TimeSite:" + timeStamp;
+	    	String key = "ts:" + timeStamp;
 	    	int h = hash(key);
-	    	int seconds = 24 * 3600;
+	    	int seconds = 4 * 3600;
 	    	
 	    	if (++_count % 100 == 0) {
-	    		LOG.info(String.format("BoltTimeSite %d: time=%s site=%s", _count, time, site));
-	    		LOG.info(String.format("BoltTimeSite %d: key=%s h=%d", _count, key, h));
+	    		LOG.info(String.format("BoltTimeSn %d: time=%s sn=%s", _count, time, sn));
+	    		LOG.info(String.format("BoltTimeSn %d: key=%s h=%d", _count, key, h));
 	    	}
 	    	
-	    	_arrRedisServer[h].zincrby(key, 1, site);
+	    	_arrRedisServer[h].zincrby(key, 1, sn);
 	    	_arrRedisServer[h].expire(key, seconds);
 		} catch (Exception e) {
-			LOG.info("BoltTimeSite.execute.exception:", e);
+			LOG.info("BoltTimeSn.execute.exception:", e);
 			init(_conf);
 		}
 	}
