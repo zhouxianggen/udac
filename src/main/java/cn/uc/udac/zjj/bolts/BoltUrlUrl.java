@@ -76,7 +76,7 @@ public class BoltUrlUrl extends BaseBasicBolt {
 	    	int h = hash(key);
 	    	int pv = _arrRedisServer[h].incr(key).intValue();
 	    	
-	    	_arrRedisServer[h].expire(key, 60);
+	    	_arrRedisServer[h].expire(key, 30);
 	    	
 	    	if (++_count % 100 == 0) {
 	    		LOG.info(String.format("BoltUrlUrl %d: time=%s url=%s refer=%s", _count, time, url, refer));
