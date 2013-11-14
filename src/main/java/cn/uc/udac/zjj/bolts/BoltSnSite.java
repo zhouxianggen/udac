@@ -76,7 +76,7 @@ public class BoltSnSite extends BaseBasicBolt {
 	    	Date tmp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
 	    	String timeStamp = new SimpleDateFormat("yyyy-MM").format(tmp);
 	    	String site = new URL(url).getHost();
-	    	String key = "SnSite:" + sn + "`" + timeStamp;
+	    	String key = "SnSite`" + sn + "`" + timeStamp;
 	    	int h = hash(key);
 	    	int seconds = 120 * 24 * 3600;
 	    	

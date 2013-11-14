@@ -75,7 +75,7 @@ public class BoltTimeSn extends BaseBasicBolt {
 	    	String sn = input.getString(3);
 	    	Date tmp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
 	    	String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH").format(tmp);
-	    	String key = "TimeSn:" + timeStamp;
+	    	String key = "TimeSn`" + timeStamp;
 	    	int h = hash(key);
 	    	int seconds = 4 * 3600;
 	    	

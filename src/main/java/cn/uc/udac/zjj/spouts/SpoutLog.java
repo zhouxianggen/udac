@@ -1,7 +1,7 @@
 /*
- * BoltSnSite 
+ * SpoutLog 
  * 
- * 1.0 记录sn访问的site分布
+ * 1.0 从ucmq里面取中间件日志
  *
  * zhouxg@ucweb.com 
  */
