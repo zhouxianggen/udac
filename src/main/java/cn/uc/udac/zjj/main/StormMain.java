@@ -38,7 +38,7 @@ public class StormMain {
 		builder.setBolt("b_site_site", new BoltSiteSite(), 4).shuffleGrouping("b_sn_last_url");
 		builder.setBolt("b_url_url", new BoltUrlUrl(), 4).shuffleGrouping("b_sn_last_url");
 		
-		conf.setNumWorkers(48);
+		conf.setNumWorkers(52);
 		Map myconf = Utils.findAndReadConfigFile("udac.yaml");
 		conf.putAll(myconf);
 
