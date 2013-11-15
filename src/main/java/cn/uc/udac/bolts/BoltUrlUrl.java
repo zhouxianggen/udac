@@ -82,7 +82,7 @@ public class BoltUrlUrl extends BaseBasicBolt {
 	    		LOG.info(String.format("BoltUrlUrl %d: time=%s, url=%s, refer=%s", _count, time, url, refer));
 	    	}
 	    	
-	    	if (pv > 100) {
+	    	if (pv > 10) {
 	    		Date tmp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
 		    	tmp.setMinutes(tmp.getMinutes()/30);
 		    	String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(tmp);
