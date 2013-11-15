@@ -80,7 +80,7 @@ public class BoltSiteSim extends BaseBasicBolt {
 	    	int snSize = input.getInteger(1).intValue();
 	    	int snIndex = input.getInteger(2).intValue();
 	    	String sn = input.getString(3);
-	    	Date date = new SimpleDateFormat("yyyy-MM-dd").parse(time);
+	    	Date date = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").parse(time);
 	    	Map<String, Double> mapSites = new HashMap<String, Double>();
 	    	
 	    	for (int i=0; i<2; ++i) {
@@ -89,7 +89,7 @@ public class BoltSiteSim extends BaseBasicBolt {
 		    	int h = hash(key, _arrRedisSnSite.length);
 		    	
 		    	Set<redis.clients.jedis.Tuple> s = _arrRedisSnSite[h].zrangeWithScores(key, 0, -1);
-		    	LOG.info(String.format("BoltSiteSim: get %d site from %s", s.size(), key));
+		    	//LOG.info(String.format("BoltSiteSim: get %d site from %s", s.size(), key));
 		    	
 		    	for (redis.clients.jedis.Tuple t : s) {
 		    		Double pv = t.getScore();
@@ -120,7 +120,7 @@ public class BoltSiteSim extends BaseBasicBolt {
 	    	String key = "SiteSim";
 	    	int h = hash(key, _arrRedisSiteSim.length);
 	    	double process = _arrRedisSiteSim[h].zincrby(key, 1.0/(double)snSize, time);
-	    	LOG.info(String.format("BoltSiteSim: process = %f", process));
+	    	LOG.info(String.format("BoltSiteSim: process of %s = %f", time, process));
 		} catch (Exception e) {
 			LOG.info("BoltSnSite.execute.exception:", e);
 			init(_conf);

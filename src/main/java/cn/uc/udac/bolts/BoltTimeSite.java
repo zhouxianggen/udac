@@ -80,7 +80,7 @@ public class BoltTimeSite extends BaseBasicBolt {
 	    	int h = hash(key, _arrRedisTimeSite.length);
 	    	int seconds = 24 * 3600;
 	    	
-	    	if (++_count % 100 == 0) {
+	    	if (++_count % 1000 == 0) {
 	    		LOG.info(String.format("BoltTimeSite %d: time=%s, site=%s", _count, time, site));
 	    		LOG.info(String.format("BoltTimeSite: key=%s, h=%d", key, h));
 	    	}

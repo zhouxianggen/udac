@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 
 public class SpoutTimeSn extends BaseRichSpout {
@@ -74,7 +75,7 @@ public class SpoutTimeSn extends BaseRichSpout {
 		try {
 			Set<String> snSet = new HashSet<String>();
 			Calendar calendar = Calendar.getInstance();
-			String startTime = new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime());
+			String startTime = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(calendar.getTime());
 			
 			for (int i=0; i<4; i+=1) {
 				String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH").format(calendar.getTime());
@@ -95,7 +96,7 @@ public class SpoutTimeSn extends BaseRichSpout {
 				snIndex += 1;
 			}
 			
-			Thread.sleep(36 * 3600);
+			TimeUnit.DAYS.sleep(1);
 		} catch (Exception e) {
 			LOG.info("SpoutTimeSn.nextTuple.exception: ", e);
 		}

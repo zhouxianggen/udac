@@ -80,7 +80,7 @@ public class BoltSiteUrl extends BaseBasicBolt {
 	    	
 	    	_arrRedisSiteUrl[h].expire(key, 300);
 	    	
-	    	if (++_count % 100 == 0) {
+	    	if (++_count % 1000 == 0) {
 	    		LOG.info(String.format("BoltSiteUrl %d: time=%s, url=%s", _count, time, url));
 	    	}
 	    	

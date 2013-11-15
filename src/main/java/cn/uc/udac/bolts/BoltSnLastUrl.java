@@ -82,7 +82,7 @@ public class BoltSnLastUrl extends BaseBasicBolt {
 	    	int seconds = 120;
 	    	String refer = _arrRedisSnLastUrl[h].get(key);
 	    	
-	    	if (++_count % 100 == 0) {
+	    	if (++_count % 1000 == 0) {
 	    		LOG.info(String.format("BoltSnLastUrl %d: time=%s, sn=%s, url=%s, refer=%s", 
 	    				_count, time, sn, url, refer));
 	    		LOG.info(String.format("BoltSnLastUrl: key=%s, h=%d", key, h));
