@@ -7,7 +7,7 @@
  */
 
 
-package cn.uc.udac.zjj.bolts;
+package cn.uc.udac.bolts;
 
 
 import java.net.URL;
@@ -29,8 +29,8 @@ import backtype.storm.tuple.Tuple;
 
 public class BoltTimeSite extends BaseBasicBolt {
 	
-	static public Logger LOG = Logger.getLogger(BoltCitySite.class);
-	private Jedis[] _arrRedisServer;
+	static public Logger LOG = Logger.getLogger(BoltTimeSite.class);
+	private Jedis[] _arrRedisTimeSite;
 	private Map _conf;
 	private int _count = 0;
 
@@ -42,10 +42,10 @@ public class BoltTimeSite extends BaseBasicBolt {
 			LOG.info(String.format("BoltTimeSite.init, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
 					port));
 			
-			_arrRedisServer = new Jedis[hosts.size()];
+			_arrRedisTimeSite = new Jedis[hosts.size()];
 			
 			for (int i = 0; i < hosts.size(); ++i) {
-				_arrRedisServer[i] = new Jedis(hosts.get(i), port);
+				_arrRedisTimeSite[i] = new Jedis(hosts.get(i), port);
 			}
 		} catch (Exception e) {
 			LOG.info("BoltTimeSite.init.exception:", e);
@@ -58,14 +58,14 @@ public class BoltTimeSite extends BaseBasicBolt {
 		init(_conf);
     }
     
-	private int hash(String key) {
+	private int hash(String key, int size) {
 		int h = 0;
 		
 		for (int i = 0; i < key.length(); ++i) {
 			h += key.codePointAt(i);
 		}
 		
-		return h % _arrRedisServer.length;
+		return h % size;
 	}
 	
     @Override
@@ -77,16 +77,16 @@ public class BoltTimeSite extends BaseBasicBolt {
 	    	String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH").format(tmp);
 	    	String site = new URL(url).getHost();
 	    	String key = "TimeSite`" + timeStamp;
-	    	int h = hash(key);
+	    	int h = hash(key, _arrRedisTimeSite.length);
 	    	int seconds = 24 * 3600;
 	    	
 	    	if (++_count % 100 == 0) {
-	    		LOG.info(String.format("BoltTimeSite %d: time=%s site=%s", _count, time, site));
-	    		LOG.info(String.format("BoltTimeSite %d: key=%s h=%d", _count, key, h));
+	    		LOG.info(String.format("BoltTimeSite %d: time=%s, site=%s", _count, time, site));
+	    		LOG.info(String.format("BoltTimeSite: key=%s, h=%d", key, h));
 	    	}
 	    	
-	    	_arrRedisServer[h].zincrby(key, 1, site);
-	    	_arrRedisServer[h].expire(key, seconds);
+	    	_arrRedisTimeSite[h].zincrby(key, 1, site);
+	    	_arrRedisTimeSite[h].expire(key, seconds);
 		} catch (Exception e) {
 			LOG.info("BoltTimeSite.execute.exception:", e);
 			init(_conf);

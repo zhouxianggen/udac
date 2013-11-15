@@ -1,13 +1,13 @@
 /*
- * BoltImeiImsi
+ * BoltImsiImei
  * 
- * 1.0 记录imei上的imsi分布
+ * 1.0 记录imsi上的imei分布
  *
  * zhouxg@ucweb.com 
  */
 
 
-package cn.uc.udac.zjj.bolts;
+package cn.uc.udac.bolts;
 
 
 import java.net.URL;
@@ -26,28 +26,28 @@ import backtype.storm.topology.base.BaseBasicBolt;
 import backtype.storm.tuple.Tuple;
 
 
-public class BoltImeiImsi extends BaseBasicBolt {
+public class BoltImsiImei extends BaseBasicBolt {
 	
 	static public Logger LOG = Logger.getLogger(BoltImsiImei.class);
-	private Jedis[] _arrRedisServer;
+	private Jedis[] _arrRedisImsiImei;
 	private Map _conf;
 	private int _count = 0;
 
 	private void init(Map conf) {
 		try {
-			List<String> hosts = (List<String>)conf.get("imei_imsi_redis_hosts");
+			List<String> hosts = (List<String>)conf.get("imsi_imei_redis_hosts");
 			int port = ( (Long)conf.get("redis_port") ).intValue();
 			
-			LOG.info(String.format("BoltImeiImsi.init, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
+			LOG.info(String.format("BoltImsiImei.init, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
 					port));
 			
-			_arrRedisServer = new Jedis[hosts.size()];
+			_arrRedisImsiImei = new Jedis[hosts.size()];
 			
 			for (int i = 0; i < hosts.size(); ++i) {
-				_arrRedisServer[i] = new Jedis(hosts.get(i), port);
+				_arrRedisImsiImei[i] = new Jedis(hosts.get(i), port);
 			}
 		} catch (Exception e) {
-			LOG.info("BoltImeiImsi.init.exception:", e);
+			LOG.info("BoltImsiImei.init.exception:", e);
 		}
 	}
 	
@@ -57,14 +57,14 @@ public class BoltImeiImsi extends BaseBasicBolt {
 		init(_conf);
     }
     
-	private int hash(String key) {
+	private int hash(String key, int size) {
 		int h = 0;
 		
 		for (int i = 0; i < key.length(); ++i) {
 			h += key.codePointAt(i);
 		}
 		
-		return h % _arrRedisServer.length;
+		return h % size;
 	}
 	
     @Override
@@ -75,19 +75,19 @@ public class BoltImeiImsi extends BaseBasicBolt {
 	    	String imsi = input.getString(2);
 	    	Date tmp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
 	    	String timeStamp = new SimpleDateFormat("yyyy-MM-dd").format(tmp);
-	    	String key = "ImeiImsi`" + imei + "`" + timeStamp;
-	    	int h = hash(key);
+	    	String key = "ImsiImei`" + imsi + "`" + timeStamp;
+	    	int h = hash(key, _arrRedisImsiImei.length);
 	    	int seconds = 4 * 24 * 3600;
 	    	
 	    	if (++_count % 100 == 0) {
-	    		LOG.info(String.format("BoltImeiImsi %d: time=%s imsi=%s, imei=%s", _count, time, imei, imsi));
-	    		LOG.info(String.format("BoltImeiImsi %d: key=%s h=%d", _count, key, h));
+	    		LOG.info(String.format("BoltImsiImei %d: time=%s, imsi=%s, imei=%s", _count, time, imsi, imei));
+	    		LOG.info(String.format("BoltImsiImei: key=%s h=%d", key, h));
 	    	}
 	    	
-	    	_arrRedisServer[h].zincrby(key, 1, imsi);
-	    	_arrRedisServer[h].expire(key, seconds);
+	    	_arrRedisImsiImei[h].zincrby(key, 1, imei);
+	    	_arrRedisImsiImei[h].expire(key, seconds);
 		} catch (Exception e) {
-			LOG.info("BoltImeiImsi.execute.exception:", e);
+			LOG.info("BoltImsiImei.execute.exception:", e);
 			init(_conf);
 		}
 	}

@@ -7,7 +7,7 @@
  */
 
 
-package cn.uc.udac.zjj.bolts;
+package cn.uc.udac.bolts;
 
 
 import java.net.URL;
@@ -29,7 +29,7 @@ import backtype.storm.tuple.Tuple;
 public class BoltSiteSite extends BaseBasicBolt {
 	
 	static public Logger LOG = Logger.getLogger(BoltSiteSite.class);
-	private Jedis[] _arrRedisServer;
+	private Jedis[] _arrRedisSiteSite;
 	private Map _conf;
 	private int _count = 0;
 
@@ -41,10 +41,10 @@ public class BoltSiteSite extends BaseBasicBolt {
 			LOG.info(String.format("BoltSiteSite.init, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
 					port));
 			
-			_arrRedisServer = new Jedis[hosts.size()];
+			_arrRedisSiteSite = new Jedis[hosts.size()];
 			
 			for (int i = 0; i < hosts.size(); ++i) {
-				_arrRedisServer[i] = new Jedis(hosts.get(i), port);
+				_arrRedisSiteSite[i] = new Jedis(hosts.get(i), port);
 			}
 		} catch (Exception e) {
 			LOG.info("BoltSiteSite.init.exception:", e);
@@ -57,14 +57,14 @@ public class BoltSiteSite extends BaseBasicBolt {
 		init(_conf);
     }
     
-	private int hash(String key) {
+	private int hash(String key, int size) {
 		int h = 0;
 		
 		for (int i = 0; i < key.length(); ++i) {
 			h += key.codePointAt(i);
 		}
 		
-		return h % _arrRedisServer.length;
+		return h % size;
 	}
 	
     @Override
@@ -78,17 +78,17 @@ public class BoltSiteSite extends BaseBasicBolt {
 	    	String siteFrom = new URL(refer).getHost();
 	    	String siteTo = new URL(url).getHost();
 	    	String key = "SiteSite`" + siteFrom + "`" + timeStamp;
-	    	int h = hash(key);
+	    	int h = hash(key, _arrRedisSiteSite.length);
 	    	int seconds = 4 * 24 * 3600;
 	    	
 	    	if (++_count % 100 == 0) {
-	    		LOG.info(String.format("BoltSiteSite %d: time=%s url=%s, refer=%s", _count, time, url, refer));
-	    		LOG.info(String.format("BoltSiteSite %d: key=%s h=%d", _count, key, h));
+	    		LOG.info(String.format("BoltSiteSite %d: time=%s, url=%s, refer=%s", _count, time, url, refer));
+	    		LOG.info(String.format("BoltSiteSite: key=%s h=%d", key, h));
 	    	}
 	    	
 	    	if (!siteFrom.equals(siteTo)) {
-	    		_arrRedisServer[h].zincrby(key, 1, siteTo);
-	    		_arrRedisServer[h].expire(key, seconds);
+	    		_arrRedisSiteSite[h].zincrby(key, 1, siteTo);
+	    		_arrRedisSiteSite[h].expire(key, seconds);
 	    	}
 		} catch (Exception e) {
 			LOG.info("BoltSiteSite.execute.exception:", e);

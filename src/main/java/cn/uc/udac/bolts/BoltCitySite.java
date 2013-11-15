@@ -1,13 +1,13 @@
 /*
- * BoltTimeSn
+ * BoltCitySite
  * 
- * 1.0 记录每段时间上的sn分布
+ * 1.0 记录city上的site分布
  *
  * zhouxg@ucweb.com 
  */
 
 
-package cn.uc.udac.zjj.bolts;
+package cn.uc.udac.bolts;
 
 
 import java.net.URL;
@@ -27,28 +27,28 @@ import backtype.storm.topology.base.BaseBasicBolt;
 import backtype.storm.tuple.Tuple;
 
 
-public class BoltTimeSn extends BaseBasicBolt {
+public class BoltCitySite extends BaseBasicBolt {
 	
 	static public Logger LOG = Logger.getLogger(BoltCitySite.class);
-	private Jedis[] _arrRedisServer;
+	private Jedis[] _arrRedisCitySite;
 	private Map _conf;
 	private int _count = 0;
 
 	private void init(Map conf) {
 		try {
-			List<String> hosts = (List<String>)conf.get("time_sn_redis_hosts");
+			List<String> hosts = (List<String>)conf.get("city_site_redis_hosts");
 			int port = ( (Long)conf.get("redis_port") ).intValue();
 			
-			LOG.info(String.format("BoltTimeSn.init, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
+			LOG.info(String.format("BoltCitySite.init, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
 					port));
 			
-			_arrRedisServer = new Jedis[hosts.size()];
+			_arrRedisCitySite = new Jedis[hosts.size()];
 			
 			for (int i = 0; i < hosts.size(); ++i) {
-				_arrRedisServer[i] = new Jedis(hosts.get(i), port);
+				_arrRedisCitySite[i] = new Jedis(hosts.get(i), port);
 			}
 		} catch (Exception e) {
-			LOG.info("BoltTimeSn.init.exception:", e);
+			LOG.info("BoltCitySite.init.exception:", e);
 		}
 	}
 	
@@ -58,36 +58,38 @@ public class BoltTimeSn extends BaseBasicBolt {
 		init(_conf);
     }
     
-	private int hash(String key) {
+	private int hash(String key, int size) {
 		int h = 0;
 		
 		for (int i = 0; i < key.length(); ++i) {
 			h += key.codePointAt(i);
 		}
 		
-		return h % _arrRedisServer.length;
+		return h % size;
 	}
 	
     @Override
 	public void execute(Tuple input, BasicOutputCollector collector) {
     	try {
     		String time = input.getString(0);
-	    	String sn = input.getString(3);
+	    	String city = input.getString(4);
+	    	String url = input.getString(5);
 	    	Date tmp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
-	    	String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH").format(tmp);
-	    	String key = "TimeSn`" + timeStamp;
-	    	int h = hash(key);
-	    	int seconds = 4 * 3600;
+	    	String timeStamp = new SimpleDateFormat("yyyy-MM-dd").format(tmp);
+	    	String site = new URL(url).getHost();
+	    	String key = "CitySite`" + city + "`" + timeStamp;
+	    	int h = hash(key, _arrRedisCitySite.length);
+	    	int seconds = 4 * 24 * 3600;
 	    	
 	    	if (++_count % 100 == 0) {
-	    		LOG.info(String.format("BoltTimeSn %d: time=%s sn=%s", _count, time, sn));
-	    		LOG.info(String.format("BoltTimeSn %d: key=%s h=%d", _count, key, h));
+	    		LOG.info(String.format("BoltCitySite %d: time=%s, city=%s, site=%s", _count, time, city, site));
+	    		LOG.info(String.format("BoltCitySite: key=%s h=%d", key, h));
 	    	}
 	    	
-	    	_arrRedisServer[h].zincrby(key, 1, sn);
-	    	_arrRedisServer[h].expire(key, seconds);
+	    	_arrRedisCitySite[h].zincrby(key, 1, site);
+	    	_arrRedisCitySite[h].expire(key, seconds);
 		} catch (Exception e) {
-			LOG.info("BoltTimeSn.execute.exception:", e);
+			LOG.info("BoltCitySite.execute.exception:", e);
 			init(_conf);
 		}
 	}

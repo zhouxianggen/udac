@@ -1,5 +1,5 @@
 /*
- * SpoutLog 
+ * SpoutZjjLog 
  * 
  * 1.0 从ucmq里面取中间件日志
  *
@@ -7,7 +7,7 @@
  */
 
 
-package cn.uc.udac.zjj.spouts;
+package cn.uc.udac.spouts;
 
 
 import backtype.storm.spout.SpoutOutputCollector;
@@ -17,18 +17,15 @@ import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import cn.uc.udac.mqs.UCMessageQueue;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import java.io.IOException;
-import java.net.URL;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 
-public class SpoutLog extends BaseRichSpout {
+public class SpoutZjjLog extends BaseRichSpout {
 	
-	static public Logger LOG = Logger.getLogger(SpoutLog.class);
+	static public Logger LOG = Logger.getLogger(SpoutZjjLog.class);
 	private SpoutOutputCollector _collector;
 	private UCMessageQueue[] _arrMq;
 	private int _count = 0;
@@ -55,14 +52,14 @@ public class SpoutLog extends BaseRichSpout {
 				String[] parts = msg.split("`");
 				
 				if (parts.length == 6) {
-					if (++_count % 100 == 0) {
-						LOG.info(String.format("SpoutLog.next, msg=%s", msg));
+					if (++_count % 1000 == 0) {
+						LOG.info(String.format("SpoutZjjLog.next, msg=%s", msg));
 					}
 					_collector.emit(new Values(parts));
 				}
 			}
 			catch (IOException e) {
-				//LOG.info("SpoutLog.nextTuple.exception: ", e);
+				LOG.info("SpoutZjjLog.nextTuple.exception: ", e);
 			}
 		}
 	}

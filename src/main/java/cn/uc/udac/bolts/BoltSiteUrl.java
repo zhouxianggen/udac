@@ -7,7 +7,7 @@
  */
 
 
-package cn.uc.udac.zjj.bolts;
+package cn.uc.udac.bolts;
 
 
 import java.net.URL;
@@ -30,7 +30,7 @@ import backtype.storm.tuple.Tuple;
 public class BoltSiteUrl extends BaseBasicBolt {
 	
 	static public Logger LOG = Logger.getLogger(BoltSiteUrl.class);
-	private Jedis[] _arrRedisServer;
+	private Jedis[] _arrRedisSiteUrl;
 	private Map _conf;
 	private int _count = 0;
 
@@ -42,10 +42,10 @@ public class BoltSiteUrl extends BaseBasicBolt {
 			LOG.info(String.format("BoltSiteUrl.init, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
 					port));
 			
-			_arrRedisServer = new Jedis[hosts.size()];
+			_arrRedisSiteUrl = new Jedis[hosts.size()];
 			
 			for (int i = 0; i < hosts.size(); ++i) {
-				_arrRedisServer[i] = new Jedis(hosts.get(i), port);
+				_arrRedisSiteUrl[i] = new Jedis(hosts.get(i), port);
 			}
 		} catch (Exception e) {
 			LOG.info("BoltSiteUrl.init.exception:", e);
@@ -58,14 +58,14 @@ public class BoltSiteUrl extends BaseBasicBolt {
 		init(_conf);
     }
     
-	private int hash(String key) {
+	private int hash(String key, int size) {
 		int h = 0;
 		
 		for (int i = 0; i < key.length(); ++i) {
 			h += key.codePointAt(i);
 		}
 		
-		return h % _arrRedisServer.length;
+		return h % size;
 	}
 	
     @Override
@@ -75,26 +75,26 @@ public class BoltSiteUrl extends BaseBasicBolt {
 	    	String url = input.getString(5);
 	    	String site = new URL(url).getHost();
 	    	String key = "SiteUrl`" + url;
-	    	int h = hash(key);
-	    	int pv = _arrRedisServer[h].incr(key).intValue();
+	    	int h = hash(key, _arrRedisSiteUrl.length);
+	    	int pv = _arrRedisSiteUrl[h].incr(key).intValue();
 	    	
-	    	_arrRedisServer[h].expire(key, 60);
+	    	_arrRedisSiteUrl[h].expire(key, 300);
 	    	
 	    	if (++_count % 100 == 0) {
-	    		LOG.info(String.format("BoltSiteUrl %d: time=%s url=%s", _count, time, url));
+	    		LOG.info(String.format("BoltSiteUrl %d: time=%s, url=%s", _count, time, url));
 	    	}
 	    	
-	    	//if (pv > 500) {
-	    	if (pv > 10) {
+	    	if (pv > 100) {
 	    		Date tmp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
 		    	tmp.setMinutes(tmp.getMinutes()/15);
 		    	String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(tmp);
 		    	
 		    	key = "SiteUrl`" + site + "`" + timeStamp;
-		    	h = hash(key);
+		    	h = hash(key, _arrRedisSiteUrl.length);
+		    	LOG.info(String.format("BoltSiteUrl: key=%s, h=%d", key, h));
 		    	
-		    	_arrRedisServer[h].zadd(key, pv, url);
-	    		_arrRedisServer[h].expire(key, 1 * 3600);
+		    	_arrRedisSiteUrl[h].zadd(key, pv, url);
+		    	_arrRedisSiteUrl[h].expire(key, 1 * 3600);
 	    	}
 		} catch (Exception e) {
 			LOG.info("BoltSiteUrl.execute.exception:", e);

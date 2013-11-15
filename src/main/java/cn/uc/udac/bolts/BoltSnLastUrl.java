@@ -7,7 +7,7 @@
  */
 
 
-package cn.uc.udac.zjj.bolts;
+package cn.uc.udac.bolts;
 
 
 import java.net.URL;
@@ -33,7 +33,7 @@ import backtype.storm.tuple.Values;
 public class BoltSnLastUrl extends BaseBasicBolt {
 	
 	static public Logger LOG = Logger.getLogger(BoltSnLastUrl.class);
-	private Jedis[] _arrRedisServer;
+	private Jedis[] _arrRedisSnLastUrl;
 	private Map _conf;
 	private int _count = 0;
 
@@ -45,10 +45,10 @@ public class BoltSnLastUrl extends BaseBasicBolt {
 			LOG.info(String.format("BoltSnLastUrl.init, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
 					port));
 			
-			_arrRedisServer = new Jedis[hosts.size()];
+			_arrRedisSnLastUrl = new Jedis[hosts.size()];
 			
 			for (int i = 0; i < hosts.size(); ++i) {
-				_arrRedisServer[i] = new Jedis(hosts.get(i), port);
+				_arrRedisSnLastUrl[i] = new Jedis(hosts.get(i), port);
 			}
 		} catch (Exception e) {
 			LOG.info("BoltSnLastUrl.init.exception:", e);
@@ -61,14 +61,14 @@ public class BoltSnLastUrl extends BaseBasicBolt {
 		init(_conf);
     }
     
-	private int hash(String key) {
+	private int hash(String key, int size) {
 		int h = 0;
 		
 		for (int i = 0; i < key.length(); ++i) {
 			h += key.codePointAt(i);
 		}
 		
-		return h % _arrRedisServer.length;
+		return h % size;
 	}
 	
     @Override
@@ -78,21 +78,21 @@ public class BoltSnLastUrl extends BaseBasicBolt {
 	    	String sn = input.getString(3);
 	    	String url = input.getString(5);
 	    	String key = "SnLastUrl`" + sn;
-	    	int h = hash(key);
+	    	int h = hash(key, _arrRedisSnLastUrl.length);
 	    	int seconds = 120;
-	    	String refer = _arrRedisServer[h].get(key);
+	    	String refer = _arrRedisSnLastUrl[h].get(key);
 	    	
 	    	if (++_count % 100 == 0) {
-	    		LOG.info(String.format("BoltSnLastUrl %d: time=%s sn=%s, url=%s, refer=%s", 
+	    		LOG.info(String.format("BoltSnLastUrl %d: time=%s, sn=%s, url=%s, refer=%s", 
 	    				_count, time, sn, url, refer));
-	    		LOG.info(String.format("BoltSnLastUrl %d: key=%s h=%d", _count, key, h));
+	    		LOG.info(String.format("BoltSnLastUrl: key=%s, h=%d", key, h));
 	    	}
 	    	
 	    	if (refer != null && !refer.equals(url)) {
 	    		collector.emit(new Values(time, refer, url));
 	    	}
-	    	_arrRedisServer[h].set(key, url);
-	    	_arrRedisServer[h].expire(key, seconds);
+	    	_arrRedisSnLastUrl[h].set(key, url);
+	    	_arrRedisSnLastUrl[h].expire(key, seconds);
 		} catch (Exception e) {
 			LOG.info("BoltSnLastUrl.execute.exception:", e);
 			init(_conf);
