@@ -1,7 +1,7 @@
 /*
- * BoltImeiImsi
+ * BoltSnUrl 
  * 
- * 1.0 记录imei上的imsi分布
+ * 1.0 记录sn访问的url分布
  *
  * zhouxg@ucweb.com 
  */
@@ -19,35 +19,39 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import redis.clients.jedis.Jedis;
+import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.BasicOutputCollector;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseBasicBolt;
+import backtype.storm.topology.base.BaseRichBolt;
+import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
+import backtype.storm.tuple.Values;
 
 
-public class BoltImeiImsi extends BaseBasicBolt {
+public class BoltSnUrl extends BaseBasicBolt {
 	
-	static public Logger LOG = Logger.getLogger(BoltImeiImsi.class);
-	private Jedis[] _arrRedisImeiImsi;
+	static public Logger LOG = Logger.getLogger(BoltSnUrl.class);
+	private Jedis[] _arrRedisSnUrl;
 	private Map _conf;
 	private int _count = 0;
 
 	private void init(Map conf) {
 		try {
-			List<String> hosts = (List<String>)conf.get("imei_imsi_redis_hosts");
+			List<String> hosts = (List<String>)conf.get("sn_url_redis_hosts");
 			int port = ( (Long)conf.get("redis_port") ).intValue();
 			
-			LOG.info(String.format("BoltImeiImsi.init, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
+			LOG.info(String.format("BoltSnUrl.init, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
 					port));
 			
-			_arrRedisImeiImsi = new Jedis[hosts.size()];
+			_arrRedisSnUrl = new Jedis[hosts.size()];
 			
 			for (int i = 0; i < hosts.size(); ++i) {
-				_arrRedisImeiImsi[i] = new Jedis(hosts.get(i), port);
+				_arrRedisSnUrl[i] = new Jedis(hosts.get(i), port);
 			}
 		} catch (Exception e) {
-			LOG.info("BoltImeiImsi.init.exception:", e);
+			LOG.info("BoltSnUrl.init.exception:", e);
 		}
 	}
 	
@@ -71,29 +75,30 @@ public class BoltImeiImsi extends BaseBasicBolt {
 	public void execute(Tuple input, BasicOutputCollector collector) {
     	try {
     		String time = input.getString(0);
-	    	String imei = input.getString(1);
-	    	String imsi = input.getString(2);
+	    	String sn = input.getString(3);
+	    	String url = input.getString(5);
 	    	Date tmp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
 	    	String timeStamp = new SimpleDateFormat("yyyy-MM-dd").format(tmp);
-	    	String key = "ImeiImsi`" + imei + "`" + timeStamp;
-	    	int h = hash(key, _arrRedisImeiImsi.length);
-	    	int seconds = 4 * 24 * 3600;
+	    	String key = "SnUrl`" + sn + "`" + timeStamp;
+	    	int h = hash(key, _arrRedisSnUrl.length);
+	    	int seconds = 7 * 24 * 3600;
 	    	
 	    	if (++_count % 1000 == 0) {
-	    		LOG.info(String.format("BoltImeiImsi %d: time=%s, imsi=%s, imei=%s", _count, time, imei, imsi));
-	    		LOG.info(String.format("BoltImeiImsi: key=%s h=%d", key, h));
+	    		LOG.info(String.format("BoltSnUrl %d: time=%s, sn=%s, url=%s", _count, time, sn, url));
+	    		LOG.info(String.format("BoltSnUrl: key=%s, h=%d", key, h));
 	    	}
 	    	
-	    	_arrRedisImeiImsi[h].zincrby(key, 1, imsi);
-	    	_arrRedisImeiImsi[h].expire(key, seconds);
+	    	_arrRedisSnUrl[h].zadd(key, 1, url);
+	    	_arrRedisSnUrl[h].expire(key, seconds);
 		} catch (Exception e) {
-			LOG.info("BoltImeiImsi.execute.exception:", e);
+			LOG.info("BoltSnUrl.execute.exception:", e);
 			init(_conf);
 		}
 	}
 
     @Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+    	declarer.declare(new Fields("time", "lastUrl", "url"));
 	}
 
 }

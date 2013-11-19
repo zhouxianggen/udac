@@ -36,10 +36,7 @@ site_site_redis_hosts:
 url_url_redis_hosts:
     - "pagediff2"
     
-imsi_imei_redis_hosts:
-    - "pagediff5"
-
-imei_imsi_redis_hosts:
+sn_url_redis_hosts:
     - "pagediff5"
 
 redis_port : 6379
