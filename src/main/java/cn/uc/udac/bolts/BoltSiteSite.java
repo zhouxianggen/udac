@@ -77,17 +77,23 @@ public class BoltSiteSite extends BaseBasicBolt {
 	    	String timeStamp = new SimpleDateFormat("yyyy-MM-dd").format(tmp);
 	    	String siteFrom = new URL(refer).getHost();
 	    	String siteTo = new URL(url).getHost();
-	    	String key = "SiteSite`" + siteFrom + "`" + timeStamp;
-	    	int h = hash(key, _arrRedisSiteSite.length);
-	    	int seconds = 4 * 24 * 3600;
 	    	
 	    	if (++_count % 1000 == 0) {
 	    		LOG.info(String.format("BoltSiteSite %d: time=%s, url=%s, refer=%s", _count, time, url, refer));
-	    		LOG.info(String.format("BoltSiteSite: key=%s h=%d", key, h));
 	    	}
 	    	
 	    	if (!siteFrom.equals(siteTo)) {
+	    		String key = "SiteSite`from`" + siteFrom + "`" + timeStamp;
+		    	int h = hash(key, _arrRedisSiteSite.length);
+		    	int seconds = 4 * 24 * 3600;
+		    	
 	    		_arrRedisSiteSite[h].zincrby(key, 1, siteTo);
+	    		_arrRedisSiteSite[h].expire(key, seconds);
+	    		
+	    		key = "SiteSite`to`" + siteTo + "`" + timeStamp;
+		    	h = hash(key, _arrRedisSiteSite.length);
+		    	
+	    		_arrRedisSiteSite[h].zincrby(key, 1, siteFrom);
 	    		_arrRedisSiteSite[h].expire(key, seconds);
 	    	}
 		} catch (Exception e) {
