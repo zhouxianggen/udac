@@ -55,16 +55,14 @@ public class SpoutZjjLog extends BaseRichSpout {
 					if (++_count % 1000 == 0) {
 						LOG.info(String.format("SpoutZjjLog.next, msg=%s", msg));
 					}
-					String sn = parts[3];
-					String url = parts[5];
-					String[] ss = sn.split("-");
+
+					if (parts[5].equals("about:blank"))
+						continue;
 					
+					String[] ss = parts[3].split("-");
 					if (ss.length != 3)
 						continue;
-					sn = ss[1];
-					
-					if (url.equals("about:blank"))
-						continue;
+					parts[3] = ss[1];
 					
 					_collector.emit(new Values(parts));
 				}
