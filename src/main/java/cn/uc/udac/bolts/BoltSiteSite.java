@@ -79,23 +79,22 @@ public class BoltSiteSite extends BaseBasicBolt {
 	    	String siteTo = new URL(url).getHost();
 	    	
 	    	if (++_count % 1000 == 0) {
-	    		LOG.info(String.format("BoltSiteSite %d: time=%s, url=%s, refer=%s", _count, time, url, refer));
+	    		LOG.info(String.format("BoltSiteSite %d: time=%s, url=%s, refer=%s", _count, time, 
+	    				url, refer));
 	    	}
 	    	
-	    	if (!siteFrom.equals(siteTo)) {
-	    		String key = "SiteSite`from`" + siteFrom + "`" + timeStamp;
-		    	int h = hash(key, _arrRedisSiteSite.length);
-		    	int seconds = 4 * 24 * 3600;
-		    	
-	    		_arrRedisSiteSite[h].zincrby(key, 1, siteTo);
-	    		_arrRedisSiteSite[h].expire(key, seconds);
-	    		
-	    		key = "SiteSite`to`" + siteTo + "`" + timeStamp;
-		    	h = hash(key, _arrRedisSiteSite.length);
-		    	
-	    		_arrRedisSiteSite[h].zincrby(key, 1, siteFrom);
-	    		_arrRedisSiteSite[h].expire(key, seconds);
-	    	}
+	    	String key = "SiteSite`from`" + siteFrom + "`" + timeStamp;
+	    	int h = hash(key, _arrRedisSiteSite.length);
+	    	int seconds = 4 * 24 * 3600;
+	    	
+    		_arrRedisSiteSite[h].zincrby(key, 1, siteTo);
+    		_arrRedisSiteSite[h].expire(key, seconds);
+    		
+    		key = "SiteSite`to`" + siteTo + "`" + timeStamp;
+	    	h = hash(key, _arrRedisSiteSite.length);
+	    	
+    		_arrRedisSiteSite[h].zincrby(key, 1, siteFrom);
+    		_arrRedisSiteSite[h].expire(key, seconds);
 		} catch (Exception e) {
 			LOG.info("BoltSiteSite.execute.exception:", e);
 			init(_conf);

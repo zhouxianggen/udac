@@ -39,8 +39,6 @@ sn_last_url_redis_hosts:
 site_site_redis_hosts:
     - "pagediff5"
 
-url_url_redis_hosts:
-    - "pagediff5"
     
 
 
