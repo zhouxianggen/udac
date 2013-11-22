@@ -94,7 +94,7 @@ public class BoltSiteUrl extends BaseBasicBolt {
 		    	LOG.info(String.format("BoltSiteUrl: key=%s, h=%d", key, h));
 		    	
 		    	_arrRedisSiteUrl[h].zadd(key, pv, url);
-		    	_arrRedisSiteUrl[h].expire(key, 1 * 3600);
+		    	_arrRedisSiteUrl[h].expire(key, 24 * 3600);
 	    	}
 		} catch (Exception e) {
 			LOG.info("BoltSiteUrl.execute.exception:", e);
