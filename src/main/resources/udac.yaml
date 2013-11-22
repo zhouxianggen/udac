@@ -12,31 +12,36 @@ ucmq_name: "zjj_req"
 sn_site_redis_hosts:
     - "pagediff4"
 
+sn_url_redis_hosts:
+    - "pagediff4"
+
 site_url_redis_hosts:
     - "pagediff3"
+  
+site_time_redis_hosts:
+    - "pagediff3"
 
-city_site_redis_hosts:
-    - "pagediff4"
+site_city_redis_hosts:
+    - "pagediff3"
 
 time_site_redis_hosts:
-    - "pagediff4"
+    - "pagediff2"
 
 time_sn_redis_hosts:
-    - "pagediff4"
+    - "pagediff2"
 
 site_sim_redis_hosts:
-    - "pagediff4"
+    - "pagediff2"
         
 sn_last_url_redis_hosts:
-    - "pagediff2"
+    - "pagediff5"
 
 site_site_redis_hosts:
-    - "pagediff2"
+    - "pagediff5"
 
 url_url_redis_hosts:
-    - "pagediff2"
-    
-sn_url_redis_hosts:
     - "pagediff5"
+    
+
 
 redis_port : 6379

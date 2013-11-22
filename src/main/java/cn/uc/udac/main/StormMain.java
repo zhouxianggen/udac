@@ -28,13 +28,14 @@ public class StormMain {
 		Config conf = new Config();
 
 		builder.setSpout("s_zjj_log", new SpoutZjjLog(), 20);
-		builder.setBolt("b_sn_site", new BoltSnSite(), 4).shuffleGrouping("s_zjj_log");
 		builder.setBolt("b_site_url", new BoltSiteUrl(), 4).shuffleGrouping("s_zjj_log");
-		builder.setBolt("b_city_site", new BoltCitySite(), 4).shuffleGrouping("s_zjj_log");
+		builder.setBolt("b_site_time", new BoltSiteTime(), 4).shuffleGrouping("s_zjj_log");
+		builder.setBolt("b_site_city", new BoltSiteCity(), 4).shuffleGrouping("s_zjj_log");
+		builder.setBolt("b_sn_site", new BoltSnSite(), 4).shuffleGrouping("s_zjj_log");
 		builder.setBolt("b_time_site", new BoltTimeSite(), 4).shuffleGrouping("s_zjj_log");
 		builder.setBolt("b_time_sn", new BoltTimeSn(), 4).shuffleGrouping("s_zjj_log");
+		
 		builder.setBolt("b_sn_last_url", new BoltSnLastUrl(), 4).shuffleGrouping("s_zjj_log");
-		builder.setBolt("b_sn_url", new BoltSnUrl(), 4).shuffleGrouping("s_zjj_log");
 		builder.setBolt("b_site_site", new BoltSiteSite(), 4).shuffleGrouping("b_sn_last_url");
 		builder.setBolt("b_url_url", new BoltUrlUrl(), 4).shuffleGrouping("b_sn_last_url");
 		
