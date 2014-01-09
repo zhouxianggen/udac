@@ -83,7 +83,7 @@ public class SpoutZjjLog extends BaseRichSpout {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("time", "imei", "imsi", "sn", "cp", "url"));
+		declarer.declare(new Fields("time", "imei", "imsi", "usr", "cp", "url"));
 	}
 
 }

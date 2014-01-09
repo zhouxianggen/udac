@@ -30,17 +30,14 @@ import backtype.storm.tuple.Tuple;
 public class BoltTimeSite extends BaseBasicBolt {
 	
 	static public Logger LOG = Logger.getLogger(BoltTimeSite.class);
-	private Jedis[] _arrRedisTimeSite;
 	private Map _conf;
+	private Jedis[] _arrRedisTimeSite;
 	private int _count = 0;
 
 	private void init(Map conf) {
 		try {
 			List<String> hosts = (List<String>)conf.get("time_site_redis_hosts");
 			int port = ( (Long)conf.get("redis_port") ).intValue();
-			
-			LOG.info(String.format("BoltTimeSite.init, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
-					port));
 			
 			_arrRedisTimeSite = new Jedis[hosts.size()];
 			
@@ -81,8 +78,8 @@ public class BoltTimeSite extends BaseBasicBolt {
 	    	int seconds = 24 * 3600;
 	    	
 	    	if (++_count % 1000 == 0) {
-	    		LOG.info(String.format("BoltTimeSite %d: time=%s, site=%s", _count, time, site));
-	    		LOG.info(String.format("BoltTimeSite: key=%s, h=%d", key, h));
+	    		LOG.info(String.format("BoltTimeSite %d: time=%s, site=%s, key=%s", 
+	    				_count, time, site, key));
 	    	}
 	    	
 	    	_arrRedisTimeSite[h].zincrby(key, 1, site);

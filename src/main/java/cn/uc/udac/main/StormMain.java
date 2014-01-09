@@ -28,18 +28,13 @@ public class StormMain {
 		Config conf = new Config();
 
 		builder.setSpout("s_zjj_log", new SpoutZjjLog(), 20);
-		builder.setBolt("b_site_url", new BoltSiteUrl(), 4).shuffleGrouping("s_zjj_log");
-		builder.setBolt("b_site_time", new BoltSiteTime(), 4).shuffleGrouping("s_zjj_log");
-		builder.setBolt("b_site_city", new BoltSiteCity(), 4).shuffleGrouping("s_zjj_log");
-		builder.setBolt("b_sn_site", new BoltSnSite(), 4).shuffleGrouping("s_zjj_log");
 		builder.setBolt("b_time_site", new BoltTimeSite(), 4).shuffleGrouping("s_zjj_log");
-		builder.setBolt("b_time_sn", new BoltTimeSn(), 4).shuffleGrouping("s_zjj_log");
-		
-		builder.setBolt("b_sn_last_url", new BoltSnLastUrl(), 4).shuffleGrouping("s_zjj_log");
+		builder.setBolt("b_time_usr", new BoltTimeUsr(), 4).shuffleGrouping("s_zjj_log");
+		builder.setBolt("b_site_url", new BoltSiteUrl(), 4).shuffleGrouping("s_zjj_log");
+		builder.setBolt("b_usr_site", new BoltUsrSite(), 4).shuffleGrouping("s_zjj_log");
+		builder.setBolt("b_usr_last_url", new BoltUsrLastUrl(), 4).shuffleGrouping("s_zjj_log");
 		builder.setBolt("b_site_site", new BoltSiteSite(), 4).shuffleGrouping("b_sn_last_url");
-		
-		builder.setSpout("s_time_sn", new SpoutTimeSn(), 1);
-		builder.setBolt("b_site_sim", new BoltSiteSim(), 60).shuffleGrouping("s_time_sn");
+		builder.setBolt("b_url_url", new BoltUrlUrl(), 4).shuffleGrouping("b_sn_last_url");
 		
 		conf.setNumWorkers(40);
 		Map myconf = Utils.findAndReadConfigFile("udac.yaml");

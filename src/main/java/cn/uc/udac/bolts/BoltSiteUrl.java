@@ -30,17 +30,14 @@ import backtype.storm.tuple.Tuple;
 public class BoltSiteUrl extends BaseBasicBolt {
 	
 	static public Logger LOG = Logger.getLogger(BoltSiteUrl.class);
-	private Jedis[] _arrRedisSiteUrl;
 	private Map _conf;
+	private Jedis[] _arrRedisSiteUrl;
 	private int _count = 0;
 
 	private void init(Map conf) {
 		try {
 			List<String> hosts = (List<String>)conf.get("site_url_redis_hosts");
 			int port = ( (Long)conf.get("redis_port") ).intValue();
-			
-			LOG.info(String.format("BoltSiteUrl.init, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
-					port));
 			
 			_arrRedisSiteUrl = new Jedis[hosts.size()];
 			
@@ -78,20 +75,21 @@ public class BoltSiteUrl extends BaseBasicBolt {
 	    	int h = hash(key, _arrRedisSiteUrl.length);
 	    	int pv = _arrRedisSiteUrl[h].incr(key).intValue();
 	    	
-	    	_arrRedisSiteUrl[h].expire(key, 300);
+	    	_arrRedisSiteUrl[h].expire(key, 15*60);
 	    	
 	    	if (++_count % 1000 == 0) {
-	    		LOG.info(String.format("BoltSiteUrl %d: time=%s, url=%s", _count, time, url));
+	    		LOG.info(String.format("BoltSiteUrl %d: time=%s, url=%s, key=%s, pv=%d", 
+	    				_count, time, url, key, pv));
 	    	}
 	    	
-	    	if (pv > 10) {
+	    	if (pv > 100) {
 	    		Date tmp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
 		    	tmp.setMinutes(tmp.getMinutes()/15);
 		    	String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(tmp);
 		    	
 		    	key = "SiteUrl`" + site + "`" + timeStamp;
 		    	h = hash(key, _arrRedisSiteUrl.length);
-		    	LOG.info(String.format("BoltSiteUrl: key=%s, h=%d", key, h));
+		    	LOG.info(String.format("BoltSiteUrl: hot url=%s", key));
 		    	
 		    	_arrRedisSiteUrl[h].zadd(key, pv, url);
 		    	_arrRedisSiteUrl[h].expire(key, 24 * 3600);

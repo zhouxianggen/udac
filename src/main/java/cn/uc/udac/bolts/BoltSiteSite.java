@@ -29,17 +29,14 @@ import backtype.storm.tuple.Tuple;
 public class BoltSiteSite extends BaseBasicBolt {
 	
 	static public Logger LOG = Logger.getLogger(BoltSiteSite.class);
-	private Jedis[] _arrRedisSiteSite;
 	private Map _conf;
+	private Jedis[] _arrRedisSiteSite;
 	private int _count = 0;
 
 	private void init(Map conf) {
 		try {
 			List<String> hosts = (List<String>)conf.get("site_site_redis_hosts");
 			int port = ( (Long)conf.get("redis_port") ).intValue();
-			
-			LOG.info(String.format("BoltSiteSite.init, hosts=%s, port=%d", StringUtils.join(hosts, ","), 
-					port));
 			
 			_arrRedisSiteSite = new Jedis[hosts.size()];
 			
@@ -79,20 +76,19 @@ public class BoltSiteSite extends BaseBasicBolt {
 	    	String siteTo = new URL(url).getHost();
 	    	
 	    	if (++_count % 1000 == 0) {
-	    		LOG.info(String.format("BoltSiteSite %d: time=%s, url=%s, refer=%s", _count, time, 
-	    				url, refer));
+	    		LOG.info(String.format("BoltSiteSite %d: time=%s, url=%s, refer=%s",
+	    				_count, time, url, refer));
 	    	}
 	    	
 	    	String key = "SiteSite`from`" + siteFrom + "`" + timeStamp;
 	    	int h = hash(key, _arrRedisSiteSite.length);
-	    	int seconds = 4 * 24 * 3600;
+	    	int seconds = 30 * 24 * 3600;
 	    	
     		_arrRedisSiteSite[h].zincrby(key, 1, siteTo);
     		_arrRedisSiteSite[h].expire(key, seconds);
     		
     		key = "SiteSite`to`" + siteTo + "`" + timeStamp;
 	    	h = hash(key, _arrRedisSiteSite.length);
-	    	
     		_arrRedisSiteSite[h].zincrby(key, 1, siteFrom);
     		_arrRedisSiteSite[h].expire(key, seconds);
 		} catch (Exception e) {
