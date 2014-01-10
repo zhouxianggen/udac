@@ -106,12 +106,12 @@ public class BoltUrlSim extends BaseBasicBolt {
 	    	int h = hash(key, _arrRedisUrlSim.length);
 	    	String value = _arrRedisUrlSim[h].get(key);
 	    	String newValue = "";
-	    	String[] v = value.split(",");
+	    	String[] v = (value != null)? value.split(",") : new String[0];
 	    	String[] sim = new String[SIM_LEN];
 	    	
 	    	LOG.info(String.format("BoltUrlSim: url=%s, usr=%s", url, usr));
 	    	LOG.info(String.format("BoltUrlSim: bits=%s", Joiner.on("").join(lst)));
-	    	LOG.info(String.format("BoltUrlSim: value=%s", value));
+	    	LOG.info(String.format("BoltUrlSim: value=%s", (value!=null? value : "null")));
 	    	for (int i=0; i<SIM_LEN; i+=1) {
 	    		int vi = (i < v.length)? Integer.parseInt(v[i]) : 0;
 	    		vi += (i < lst.size() && lst.get(i) == 1)? 1 : -1;
