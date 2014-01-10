@@ -109,17 +109,20 @@ public class BoltUrlSim extends BaseBasicBolt {
 	    	String[] v = (value != null)? value.split(",") : new String[0];
 	    	String[] sim = new String[SIM_LEN];
 	    	
-	    	LOG.info(String.format("BoltUrlSim: url=%s, usr=%s", url, usr));
-	    	LOG.info(String.format("BoltUrlSim: bits=%s", Joiner.on("").join(lst)));
-	    	LOG.info(String.format("BoltUrlSim: value=%s", (value!=null? value : "null")));
 	    	for (int i=0; i<SIM_LEN; i+=1) {
 	    		int vi = (i < v.length)? Integer.parseInt(v[i]) : 0;
 	    		vi += (i < lst.size() && lst.get(i) == 1)? 1 : -1;
 	    		newValue += Integer.toString(vi) + ",";
 	    		sim[i] = vi >= 0? "1" : "0";
 	    	}
-	    	LOG.info(String.format("BoltUrlSim: newValue=%s", newValue));
-	    	LOG.info(String.format("BoltUrlSim: sim=%s", Joiner.on("").join(sim)));
+	    	
+	    	if (++_count % 1000 == 0) {
+	    		LOG.info(String.format("BoltUrlSim: url=%s, usr=%s", url, usr));
+	    		LOG.info(String.format("BoltUrlSim: bits=%s", Joiner.on("").join(lst)));
+	    		LOG.info(String.format("BoltUrlSim: value=%s", (value!=null? value : "null")));
+	    		LOG.info(String.format("BoltUrlSim: newValue=%s", newValue));
+	    		LOG.info(String.format("BoltUrlSim: sim=%s", Joiner.on("").join(sim)));
+	    	}
 	    	
 	    	_arrRedisUrlSim[h].set(key, newValue);
 	    	_arrRedisUrlSim[h].expire(key, seconds);
@@ -130,7 +133,7 @@ public class BoltUrlSim extends BaseBasicBolt {
 	    			key += sim[_permutes[i][j]]; 
 	    		}
 	    		h = hash(key, _arrRedisUrlSim.length);
-	    		LOG.info(String.format("BoltUrlSim: key=%s", key));
+	    		//LOG.info(String.format("BoltUrlSim: key=%s", key));
 	    		_arrRedisUrlSim[h].sadd(key, url);
 	    		_arrRedisUrlSim[h].expire(key, seconds);
 	    	}
