@@ -127,16 +127,15 @@ public class BoltUrlSim extends BaseBasicBolt {
 	    	_arrRedisUrlSim[h].set(key, newValue);
 	    	_arrRedisUrlSim[h].expire(key, seconds);
 	    	
-	    	for (int i=0; i<_permutes.length; i+=1) {
+	    	/*for (int i=0; i<_permutes.length; i+=1) {
 	    		key = "UrlSim`";
 	    		for (int j=0; j<_permutes[i].length; j+=1) {
 	    			key += sim[_permutes[i][j]]; 
 	    		}
 	    		h = hash(key, _arrRedisUrlSim.length);
-	    		//LOG.info(String.format("BoltUrlSim: key=%s", key));
 	    		_arrRedisUrlSim[h].sadd(key, url);
 	    		_arrRedisUrlSim[h].expire(key, seconds);
-	    	}
+	    	}*/
 		} catch (Exception e) {
 			LOG.info("BoltUrlSim.execute.exception:", e);
 			init(_conf);
