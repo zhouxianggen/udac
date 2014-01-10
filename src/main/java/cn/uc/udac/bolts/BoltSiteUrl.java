@@ -89,7 +89,7 @@ public class BoltSiteUrl extends BaseBasicBolt {
 		    	
 		    	key = "SiteUrl`" + site + "`" + timeStamp;
 		    	h = hash(key, _arrRedisSiteUrl.length);
-		    	LOG.info(String.format("BoltSiteUrl: hot url=%s", key));
+		    	LOG.info(String.format("BoltSiteUrl: %s hot url=%s", site, url));
 		    	
 		    	_arrRedisSiteUrl[h].zadd(key, pv, url);
 		    	_arrRedisSiteUrl[h].expire(key, 24 * 3600);
