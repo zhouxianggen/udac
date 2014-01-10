@@ -76,19 +76,25 @@ public class BoltUsrLastUrl extends BaseBasicBolt {
 	    	String url = input.getString(5);
 	    	String key = "UsrLastUrl`" + usr;
 	    	int h = hash(key, _arrRedisUsrLastUrl.length);
-	    	int seconds = 5 * 60;
-	    	String refer = _arrRedisUsrLastUrl[h].get(key);
+	    	int seconds = 60 * 60;
+	    	List<String> refers = _arrRedisUsrLastUrl[h].lrange(key, 0, -1);
 	    	
 	    	if (++_count % 1000 == 0) {
-	    		LOG.info(String.format("BoltUsrLastUrl %d: time=%s, usr=%s, url=%s, refer=%s, key=%s", 
-	    				_count, time, usr, url, refer, key));
+	    		LOG.info(String.format("BoltUsrLastUrl %d: time=%s, usr=%s, url=%s, refers=%d, key=%s", 
+	    				_count, time, usr, url, refers.size(), key));
 	    	}
 	    	
-	    	if (refer != null && !refer.equals(url)) {
-	    		collector.emit(new Values(time, refer, url));
+	    	for (int i=0,s=refers.size(); i<s; i+=1) {
+	    		String refer = refers.get(i);
+	    		if (refer != null && !refer.equals(url)) {
+	    			collector.emit(new Values(time, refer, url, s-i));
+	    		}
 	    	}
-	    	_arrRedisUsrLastUrl[h].set(key, url);
+	    	
+	    	_arrRedisUsrLastUrl[h].rpush(key, url);
 	    	_arrRedisUsrLastUrl[h].expire(key, seconds);
+	    	if (refers.size() >= 10)
+	    		_arrRedisUsrLastUrl[h].lpop(key);
 		} catch (Exception e) {
 			LOG.info("BoltUsrLastUrl.execute.exception:", e);
 			init(_conf);
@@ -97,7 +103,7 @@ public class BoltUsrLastUrl extends BaseBasicBolt {
 
     @Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-    	declarer.declare(new Fields("time", "lastUrl", "url"));
+    	declarer.declare(new Fields("time", "refer", "url", "dis"));
 	}
 
 }
