@@ -75,8 +75,8 @@ public class BoltUrlUrl extends BaseBasicBolt {
 	    	String timeStamp = new SimpleDateFormat("yyyy-MM-dd").format(tmp);
 	    	
 	    	if (++_count % 1000 == 0) {
-	    		LOG.info(String.format("BoltUrlUrl %d: time=%s, url=%s, refer=%s",
-	    				_count, time, url, refer));
+	    		LOG.info(String.format("BoltUrlUrl %d: time=%s, url=%s, refer=%s, dis=%d",
+	    				_count, time, url, refer, dis));
 	    	}
 	    	
 	    	String key = "UrlUrl`" + refer + "`" + timeStamp;

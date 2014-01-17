@@ -77,8 +77,8 @@ public class BoltSiteSite extends BaseBasicBolt {
 	    	String siteTo = new URL(url).getHost();
 	    	
 	    	if (++_count % 1000 == 0) {
-	    		LOG.info(String.format("BoltSiteSite %d: time=%s, url=%s, refer=%s",
-	    				_count, time, url, refer));
+	    		LOG.info(String.format("BoltSiteSite %d: time=%s, url=%s, refer=%s, dis=%s",
+	    				_count, time, url, refer, dis));
 	    	}
 	    	
 	    	String key = "SiteSite`from`" + siteFrom + "`" + timeStamp;

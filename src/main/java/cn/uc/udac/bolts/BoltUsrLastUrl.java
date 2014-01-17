@@ -13,8 +13,10 @@ package cn.uc.udac.bolts;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -34,6 +36,7 @@ public class BoltUsrLastUrl extends BaseBasicBolt {
 	
 	static public Logger LOG = Logger.getLogger(BoltUsrLastUrl.class);
 	private Map _conf;
+	private Set<String> _newsSites;
 	private Jedis[] _arrRedisUsrLastUrl;
 	private int _count = 0;
 
@@ -47,6 +50,9 @@ public class BoltUsrLastUrl extends BaseBasicBolt {
 			for (int i = 0; i < hosts.size(); ++i) {
 				_arrRedisUsrLastUrl[i] = new Jedis(hosts.get(i), port);
 			}
+			
+			List<String> sites = (List<String>)conf.get("news_sites");
+			_newsSites = new HashSet<String>(sites);
 		} catch (Exception e) {
 			LOG.info("BoltUsrLastUrl.init.exception:", e);
 		}
@@ -74,6 +80,8 @@ public class BoltUsrLastUrl extends BaseBasicBolt {
     		String time = input.getString(0);
 	    	String usr = input.getString(3);
 	    	String url = input.getString(5);
+	    	String site = new URL(url).getHost();
+	    	if (!_newsSites.contains(site)) return;
 	    	String key = "UsrLastUrl`" + usr;
 	    	int h = hash(key, _arrRedisUsrLastUrl.length);
 	    	int seconds = 60 * 60;
