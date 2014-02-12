@@ -84,7 +84,7 @@ public class BoltUsrLastUrl extends BaseBasicBolt {
 	    	if (!_newsSites.contains(site)) return;
 	    	String key = "UsrLastUrl`" + usr;
 	    	int h = hash(key, _arrRedisUsrLastUrl.length);
-	    	int seconds = 60 * 60;
+	    	int seconds = 24 * 60 * 60;
 	    	List<String> refers = _arrRedisUsrLastUrl[h].lrange(key, 0, -1);
 	    	
 	    	if (++_count % 1000 == 0) {
