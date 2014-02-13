@@ -96,7 +96,7 @@ public class BoltUsrLastUrl extends BaseBasicBolt {
 	    		collector.emit(new Values(time, refer, url));
 	    	}
 	    	
-	    	_arrRedisUsrLastUrl[h].rpush(key, url);
+	    	_arrRedisUsrLastUrl[h].set(key, url);
 	    	_arrRedisUsrLastUrl[h].expire(key, seconds);
 		} catch (Exception e) {
 			LOG.info("BoltUsrLastUrl.execute.exception:", e);
