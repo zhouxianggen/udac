@@ -70,20 +70,19 @@ public class BoltUrlUrl extends BaseBasicBolt {
     		String time = input.getString(0);
 	    	String refer = input.getString(1);
 	    	String url = input.getString(2);
-	    	int dis = input.getInteger(3).intValue();
 	    	Date tmp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
 	    	String timeStamp = new SimpleDateFormat("yyyy-MM-dd").format(tmp);
 	    	
 	    	if (++_count % 1000 == 0) {
-	    		LOG.info(String.format("BoltUrlUrl %d: time=%s, url=%s, refer=%s, dis=%d",
-	    				_count, time, url, refer, dis));
+	    		LOG.info(String.format("BoltUrlUrl %d: time=%s, url=%s, refer=%s",
+	    				_count, time, url, refer));
 	    	}
 	    	
 	    	String key = "UrlUrl`" + refer + "`" + timeStamp;
 	    	int h = hash(key, _arrRedisUrlUrl.length);
 	    	int seconds = 4 * 24 * 3600;
 	    	
-    		_arrRedisUrlUrl[h].zincrby(key, 1.0/dis, url);
+    		_arrRedisUrlUrl[h].zincrby(key, 1.0, url);
     		_arrRedisUrlUrl[h].expire(key, seconds);
 		} catch (Exception e) {
 			LOG.info("BoltUrlUrl.execute.exception:", e);

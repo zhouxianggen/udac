@@ -70,27 +70,26 @@ public class BoltSiteSite extends BaseBasicBolt {
     		String time = input.getString(0);
 	    	String refer = input.getString(1);
 	    	String url = input.getString(2);
-	    	int dis = input.getInteger(3).intValue();
 	    	Date tmp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
 	    	String timeStamp = new SimpleDateFormat("yyyy-MM-dd").format(tmp);
 	    	String siteFrom = new URL(refer).getHost();
 	    	String siteTo = new URL(url).getHost();
 	    	
 	    	if (++_count % 1000 == 0) {
-	    		LOG.info(String.format("BoltSiteSite %d: time=%s, url=%s, refer=%s, dis=%s",
-	    				_count, time, url, refer, dis));
+	    		LOG.info(String.format("BoltSiteSite %d: time=%s, url=%s, refer=%s",
+	    				_count, time, url, refer));
 	    	}
 	    	
 	    	String key = "SiteSite`from`" + siteFrom + "`" + timeStamp;
 	    	int h = hash(key, _arrRedisSiteSite.length);
 	    	int seconds = 30 * 24 * 3600;
 	    	
-    		_arrRedisSiteSite[h].zincrby(key, 1.0/dis, siteTo);
+    		_arrRedisSiteSite[h].zincrby(key, 1.0, siteTo);
     		_arrRedisSiteSite[h].expire(key, seconds);
     		
     		key = "SiteSite`to`" + siteTo + "`" + timeStamp;
 	    	h = hash(key, _arrRedisSiteSite.length);
-    		_arrRedisSiteSite[h].zincrby(key, 1.0/dis, siteFrom);
+    		_arrRedisSiteSite[h].zincrby(key, 1.0, siteFrom);
     		_arrRedisSiteSite[h].expire(key, seconds);
 		} catch (Exception e) {
 			LOG.info("BoltSiteSite.execute.exception:", e);
