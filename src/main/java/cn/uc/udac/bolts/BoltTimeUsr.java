@@ -84,7 +84,7 @@ public class BoltTimeUsr extends BaseBasicBolt {
 	    	_arrRedisTimeUsr[h].zincrby(key, 1, usr);
 	    	_arrRedisTimeUsr[h].expire(key, seconds);
 		} catch (Exception e) {
-			LOG.info("BoltTimeUsr.execute.exception:", e);
+			//LOG.info("BoltTimeUsr.execute.exception:", e);
 			init(_conf);
 		}
 	}

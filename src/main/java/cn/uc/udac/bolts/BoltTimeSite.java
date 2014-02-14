@@ -85,7 +85,7 @@ public class BoltTimeSite extends BaseBasicBolt {
 	    	_arrRedisTimeSite[h].zincrby(key, 1, site);
 	    	_arrRedisTimeSite[h].expire(key, seconds);
 		} catch (Exception e) {
-			LOG.info("BoltTimeSite.execute.exception:", e);
+			//LOG.info("BoltTimeSite.execute.exception:", e);
 			init(_conf);
 		}
 	}

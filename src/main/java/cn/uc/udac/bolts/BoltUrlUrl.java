@@ -85,7 +85,7 @@ public class BoltUrlUrl extends BaseBasicBolt {
     		_arrRedisUrlUrl[h].zincrby(key, 1.0, url);
     		_arrRedisUrlUrl[h].expire(key, seconds);
 		} catch (Exception e) {
-			LOG.info("BoltUrlUrl.execute.exception:", e);
+			//LOG.info("BoltUrlUrl.execute.exception:", e);
 			init(_conf);
 		}
 	}

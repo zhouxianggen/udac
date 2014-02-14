@@ -95,7 +95,7 @@ public class BoltSiteUrl extends BaseBasicBolt {
 		    	_arrRedisSiteUrl[h].expire(key, 24 * 3600);
 	    	}
 		} catch (Exception e) {
-			LOG.info("BoltSiteUrl.execute.exception:", e);
+			//LOG.info("BoltSiteUrl.execute.exception:", e);
 			init(_conf);
 		}
 	}

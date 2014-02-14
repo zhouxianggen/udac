@@ -68,7 +68,7 @@ public class SpoutZjjLog extends BaseRichSpout {
 				}
 			}
 			catch (IOException e) {
-				LOG.info("SpoutZjjLog.nextTuple.exception: ", e);
+				//LOG.info("SpoutZjjLog.nextTuple.exception: ", e);
 			}
 		}
 	}
