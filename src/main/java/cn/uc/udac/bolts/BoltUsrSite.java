@@ -85,7 +85,7 @@ public class BoltUsrSite extends BaseBasicBolt {
 	    	_arrRedisUsrSite[h].zincrby(key, 1, site);
 	    	_arrRedisUsrSite[h].expire(key, seconds);
 		} catch (Exception e) {
-			LOG.info("BoltUsrSite.execute.exception:", e);
+			//LOG.info("BoltUsrSite.execute.exception:", e);
 			init(_conf);
 		}
 	}
